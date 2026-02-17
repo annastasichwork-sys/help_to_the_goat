@@ -95,8 +95,13 @@
       border-radius: 12px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.55);
       cursor: pointer;
-      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
       min-width: 150px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 234, 112, 0.35);
     }
 
     .btn:active {
@@ -134,6 +139,54 @@
       50%      { opacity: 0.65; transform: scale(1.15); }
     }
 
+    /* Переходы между страницами */
+    .page {
+      animation: pageIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Анимация появления ТЗ */
+    .tz-box.reveal {
+      animation: tzReveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes tzReveal {
+      from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Слот-машина: вращение при генерации */
+    #design .gen-img {
+      transform-style: preserve-3d;
+    }
+
+    #design .gen-img.spinning {
+      animation: slotSpin 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes slotSpin {
+      0% { transform: rotateY(0deg) scale(1); }
+      50% { transform: rotateY(180deg) scale(1.1); }
+      100% { transform: rotateY(360deg) scale(1); }
+    }
+
+    /* Кубики: тряска при генерации */
+    .gen-img.shaking {
+      animation: diceShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+    }
+
+    @keyframes diceShake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      20% { transform: translateX(-8px) rotate(-5deg); }
+      40% { transform: translateX(8px) rotate(5deg); }
+      60% { transform: translateX(-6px) rotate(-3deg); }
+      80% { transform: translateX(6px) rotate(3deg); }
+    }
+
     /* Главная страница */
     #home {
       display: flex;
@@ -166,11 +219,37 @@
     #home .card {
       width: clamp(100px, 32vw, 150px);
       cursor: pointer;
-      transition: transform 0.25s ease;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+      border-radius: 12px;
+    }
+
+    #home .card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 12px 28px rgba(255, 234, 112, 0.25);
     }
 
     #home .card:active {
-      transform: scale(1.14);
+      transform: scale(1.08);
+    }
+
+    #home .pick-hint {
+      animation: hintPulse 2s ease-in-out infinite;
+      opacity: 0.9;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+
+    #home .card.picked {
+      animation: cardPicked 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes cardPicked {
+      0% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.15); filter: brightness(1.3); }
+      100% { transform: scale(1.05); filter: brightness(1.1); }
     }
 
     /* Страница загрузки */
@@ -186,6 +265,12 @@
       max-height: 52vh;
       object-fit: contain;
       margin: 12px 0 20px;
+      animation: dealerWave 2s ease-in-out infinite;
+    }
+
+    @keyframes dealerWave {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
     }
 
     #loading .dialog {
@@ -204,13 +289,34 @@
       gap: 1.2vh;
     }
 
-    #design { background-image: url('design_bg.webp'); }
+    #design {
+      background-image: url('design_bg.webp');
+      perspective: 600px;
+    }
     #marketing { background-image: url('marketing_bg.webp'); }
 
     .gen-img {
       width: clamp(160px, 42vw, 220px);
       margin: 12px 0 16px;
       cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .gen-img:hover {
+      transform: scale(1.08);
+    }
+
+    #design .gen-img:hover { animation: slotPulse 1.5s ease-in-out infinite; }
+    #marketing .gen-img:hover { animation: diceFloat 2s ease-in-out infinite; }
+
+    @keyframes slotPulse {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 234, 112, 0.4)); }
+      50% { filter: drop-shadow(0 0 20px rgba(255, 234, 112, 0.7)); }
+    }
+
+    @keyframes diceFloat {
+      0%, 100% { transform: scale(1.08) translateY(0); }
+      50% { transform: scale(1.08) translateY(-4px); }
     }
 
     /* Контейнер для сгенерированного ТЗ */
@@ -244,6 +350,12 @@
       align-items: center;
       gap: 6px;
       cursor: pointer;
+      transition: background 0.2s, transform 0.2s ease;
+    }
+
+    .checkboxes label:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: scale(1.03);
     }
 
     .checkboxes input[type="checkbox"] {
@@ -288,7 +400,7 @@
       <img src="card_design.png" class="card" onclick="selectRole('design')" alt="Карта дизайнера" />
       <img src="card_marketing.png" class="card" onclick="selectRole('marketing')" alt="Карта маркетолога" />
     </div>
-    <p>Выберите карту</p>
+    <p class="pick-hint">Выберите карту</p>
   </div>
 
   <!-- Страница загрузки -->
@@ -347,196 +459,131 @@
   </div>
 
   <script>
-    // Массивы с названием компании, позиционированием, продуктами, проблемами, задачами, целями и цветами.
-    // Используем полноразмерные списки, чтобы получить разнообразные кейсы.
-    const companyNames = [
-      "EcoBloom Solutions", "TechNova Innovations", "FreshHarvest Foods", "UrbanMobility Rides", "StyleForge Apparel",
-      "HealthVibe Wellness", "CodeCraft Software", "GreenLeaf Energy", "LuxeHome Interiors", "FitTrack Gear",
-      "ByteBridge Networks", "PureSip Beverages", "AdventureQuest Travel", "SmartNest Homes", "GlowBeauty Cosmetics",
-      "PowerUp Fitness", "DataSphere Analytics", "CraftBrew Masters", "EcoDrive Autos", "MindfulMed Health",
-      "VirtualWorld VR", "PetPals Supplies", "FinSecure Banking", "ArtisanalBake Goods", "SolarSpark Energy",
-      "EduQuest Learning", "FashionFusion Clothes", "AgriTech Farms", "SoundWave Audio", "BioVital Supplements",
-      "TravelTrek Tours", "HomeHarmony Decor", "SpeedNet Internet", "WellnessWave Spa", "InnovateHub Tech",
-      "GourmetGrove Foods", "AutoElite Cars", "BrainBoost Education", "StyleSphere Fashion", "EcoPure Water",
-      "GameForge Studios", "HealthHub Clinics", "CloudCore Computing", "BrewBuddy Coffee", "RideShare Mobility",
-      "BeautyBloom Skincare", "EnergyEdge Power", "SoftServe IT", "FarmFresh Produce", "LuxTravel Experiences"
-    ];
-
-    const positionings = [
-      "Экологически чистые решения для устойчивого будущего", "Инновационные технологии для цифровой трансформации",
-      "Свежие органические продукты прямо с фермы", "Удобный и доступный городской транспорт",
-      "Современная мода для уверенных в себе людей", "Holistic подход к здоровью и благополучию",
-      "Надежное ПО для бизнеса любого масштаба", "Возобновляемая энергия для зеленого мира",
-      "Элегантный дизайн интерьеров для комфорта", "Спортивное оборудование для активного образа жизни",
-      "Безопасные сети для бесперебойной связи", "Натуральные напитки для ежедневного удовольствия",
-      "Приключенческие туры для искателей адреналина", "Умные дома для современной жизни",
-      "Натуральная косметика для сияющей кожи", "Фитнес‑программы для максимальной эффективности",
-      "Аналитика данных для умных решений", "Ремесленное пиво для ценителей вкуса",
-      "Экологичные автомобили для сознательных водителей", "Ментальное здоровье через mindfulness практики",
-      "Иммерсивный VR для развлечений и образования", "Качественные товары для любимых питомцев",
-      "Безопасные финансовые услуги для всех", "Ручная выпечка с традиционными рецептами",
-      "Солнечная энергия для независимости", "Интерактивное обучение для детей и взрослых",
-      "Фьюжн стилей в одежде для креативных", "Технологии для эффективного земледелия",
-      "Аудиооборудование для профессионалов", "Биодобавки для естественного благополучия",
-      "Персонализированные путешествия по миру", "Гармоничный декор для уютного дома",
-      "Быстрый интернет для работы и развлечений", "Расслабляющие спа‑процедуры для релакса",
-      "Хаб для инноваций в технологиях", "Гурманские продукты для изысканного вкуса",
-      "Элитные автомобили для премиум‑класса", "Развитие мозга через образовательные инструменты",
-      "Сфера стиля для модных трендов", "Чистая вода для здоровья семьи",
-      "Игровые студии для эпичных приключений", "Клиники для комплексного ухода за здоровьем",
-      "Облачные решения для бизнеса", "Кофе для бодрого старта дня", "Общий транспорт для экологичного перемещения",
-      "Уход за кожей с натуральными ингредиентами", "Энергия на краю инноваций", "IT‑услуги для мягкой интеграции",
-      "Свежие продукты с фермы к столу", "Роскошные путешествия для незабываемых впечатлений"
-    ];
-
-    const products = [
-      "Органические удобрения", "AI‑платформа для автоматизации", "Свежие овощи и фрукты", "Электрические скутеры",
-      "Линейка уличной одежды", "Йога‑маты и аксессуары", "CRM‑система", "Солнечные панели",
-      "Мебель для гостиной", "Фитнес‑трекеры", "VPN‑сервисы", "Энергетические напитки",
-      "Туристические пакеты", "Умные термостаты", "Кремы для лица", "Протеиновые шейкеры",
-      "BI‑инструменты", "Крафтовое пиво", "Электрокары", "Медитационные приложения", "VR‑очки",
-      "Корм для собак", "Мобильный банкинг app", "Хлеб и пирожные", "Инверторы для солнечных систем",
-      "Онлайн‑курсы", "Аксессуары для одежды", "Дроны для ферм", "Наушники", "Витаминные комплексы",
-      "Экскурсионные туры", "Подушки и покрывала", "Роутеры", "Маски для лица", "Гаджеты для стартапов",
-      "Сыры и деликатесы", "Спортивные машины", "Пазлы для мозга", "Сумки и рюкзаки", "Фильтры для воды",
-      "Видеоигры", "Диагностическое оборудование", "Серверы", "Кофейные зерна", "Велосипеды‑шеринг",
-      "Сыворотки для кожи", "Батареи для хранения энергии", "SaaS‑платформы", "Молочные продукты",
-      "Отельные пакеты"
-    ];
-
-    const designProblems = [
-      "Устаревший логотип не отражает современный бренд", "Несоответствие цветовой палитры в UI/UX",
-      "Плохая читаемость шрифтов на мобильных устройствах", "Отсутствие responsive дизайна для разных экранов",
-      "Скучный визуальный стиль упаковки продуктов", "Несогласованность иконок в приложении",
-      "Низкое качество изображений на сайте", "Перегруженный интерфейс с лишними элементами",
-      "Отсутствие анимаций для вовлечения пользователей", "Проблемы с доступностью для людей с нарушениями зрения",
-      "Устаревший дизайн email‑рассылок", "Несовместимость брендбука с новыми продуктами",
-      "Слабый визуальный storytelling в презентациях", "Плохая композиция landing page",
-      "Отсутствие уникального маскота для бренда", "Конфликт стилей в соцсетях постах",
-      "Низкая контрастность текстов и фона", "Устаревшие иллюстрации в мерче",
-      "Проблемы с навигацией в веб‑приложении", "Отсутствие единого grid system в дизайне",
-      "Слабый фокус на ключевых элементах CTA", "Несовременный дизайн визиток",
-      "Плохая интеграция видео в интерфейс", "Отсутствие 3D‑элементов для продуктов",
-      "Конфликты в типографике бренда", "Устаревший дизайн баннеров",
-      "Низкое разрешение графики для печати", "Проблемы с white space в layouts",
-      "Отсутствие motion design в промо", "Несогласованность цветов в палитре",
-      "Слабый дизайн инфографики", "Плохая визуализация данных в дашбордах",
-      "Устаревший стиль икон‑сета", "Отсутствие AR‑элементов для продуктов",
-      "Конфликты в бренд‑гидлайнах", "Низкая привлекательность обложек",
-      "Проблемы с scaling векторной графики", "Отсутствие immersive дизайна для VR",
-      "Слабый редизайн старых ассетов", "Несовместимость с dark mode",
-      "Плохая анимация переходов", "Отсутствие custom шрифтов",
-      "Конфликты в цветовой доступности", "Устаревший дизайн флаеров",
-      "Низкое качество рендеров продуктов", "Проблемы с alignment в grids",
-      "Отсутствие interactive элементов", "Слабый дизайн error pages",
-      "Несогласованность в UI kits", "Плохая визуальная иерархия"
-    ];
-
-    const marketingProblems = [
-      "Низкий трафик на сайт из поисковиков", "Слабая конверсия в email‑кампаниях",
-      "Отток аудитории в соцсетях", "Высокий bounce rate на landing pages", "Низкий ROI от рекламы",
-      "Проблемы с сегментацией аудитории", "Слабый engagement в контент‑маркетинге",
-      "Конкуренция в PPC‑рекламе", "Низкие продажи в offseason", "Проблемы с лояльностью клиентов",
-      "Слабый охват в influencer‑маркетинге", "Высокий churn rate подписчиков",
-      "Низкая видимость в поисковых системах", "Проблемы с A/B‑тестированием",
-      "Слабый user‑generated content", "Конкуренция на рынке affiliate",
-      "Низкий CTR в ads", "Проблемы с персонализацией предложений",
-      "Слабый viral эффект кампаний", "Высокие затраты на acquisition",
-      "Низкий lifetime value клиентов", "Проблемы с ретаргетингом",
-      "Слабый PR в СМИ", "Конкуренция в content SEO",
-      "Низкие конверсии из соцсетей", "Проблемы с email deliverability",
-      "Слабый бренд‑awareness", "Высокий cart abandonment",
-      "Низкий engagement в webinars", "Проблемы с партнерствами",
-      "Слабый lead generation", "Конкуренция в programmatic ads",
-      "Низкие отзывы от клиентов", "Проблемы с маркетинг‑автоматизацией",
-      "Слабый охват в мобильном маркетинге", "Высокие затраты на content creation",
-      "Низкий NPS score", "Проблемы с cross‑selling", "Слабый event‑маркетинг",
-      "Конкуренция в видео‑рекламе", "Низкие подписки на newsletter",
-      "Проблемы с data privacy в таргетинге", "Слабый B2B lead nurturing",
-      "Высокий cost per click", "Низкий share of voice",
-      "Проблемы с сезонным маркетингом", "Слабый omnichannel подход",
-      "Конкуренция в e‑commerce", "Низкие метрики в app installs",
-      "Проблемы с crisis management в маркетинге"
-    ];
-
-    const tasks = [
-      "Разработать кампанию по повышению бренд‑осведомленности", "Проанализировать конкурентов и предложить дифференциацию",
-      "Создать сезонную промо‑стратегию", "Оптимизировать цепочку поставок для маркетинга",
-      "Переработать визуальную идентичность бренда", "Улучшить программу лояльности клиентов",
-      "Интегрировать маркетинг с IT‑системами", "Продвигать зелёные инициативы",
-      "Создать контент для соцсетей по интерьерам", "Маркетинг безопасного фитнеса",
-      "Кампания по кибербезопасности", "Разработать аллерго‑дружественный маркетинг",
-      "Адаптировать туры под новые регуляции", "Продвигать энергоэффективность",
-      "Кампания по уходу за кожей", "Мотивирующий контент для фитнеса",
-      "Очистка и анализ данных для маркетинга", "Брендинг ремесленного пива",
-      "Эко‑маркетинг для авто", "Продвижение mindfulness", "Маркетинг VR для образования",
-      "Кампании для владельцев питомцев", "Антифрод‑маркетинг в банкинге",
-      "Маркетинг свежей выпечки", "Продвижение солнечной энергии",
-      "Retention‑стратегии для курсов", "Трендовый маркетинг моды",
-      "Агро‑маркетинг технологий", "Аудио‑брендинг", "Маркетинг здоровых добавок",
-      "Безопасный туристический маркетинг", "Аллерго‑безопасный декор‑маркетинг",
-      "Продвижение быстрого интернета", "Пост‑спа маркетинг", "Фандрайзинг для инноваций",
-      "Маркетинг натуральных продуктов", "Безопасный авто‑маркетинг",
-      "Маркетинг образовательных инструментов", "Устойчивый фэшн‑маркетинг",
-      "Кампании по чистой воде", "Гейм‑маркетинг", "Доступный мед‑маркетинг",
-      "Облачный B2B‑маркетинг", "Кофейный брендинг", "Анти‑трафик кампании",
-      "Уход за кожей маркетинг", "Энерго‑хранение продвижение", "SaaS‑маркетинг",
-      "Свежий продакт‑маркетинг", "Персонализированный тревел‑маркетинг"
-    ];
-
-    const goals = [
-      "Увеличить долю рынка на 15%", "Достичь 1 млн пользователей", "Повысить продажи в offseason на 20%",
-      "Сократить затраты на логистику на 10%", "Обновить бренд‑идентичность", "Увеличить retention до 70%",
-      "Интегрировать все системы", "Стать лидером в зеленой энергии", "Расширить онлайн‑присутствие",
-      "Минимизировать травмы через образование", "Обеспечить 99.9% uptime", "Расширить линейку hypoallergenic продуктов",
-      "Адаптироваться к глобальным изменениям", "Снизить энергопотребление на 30%", "Достичь 5 млн продаж косметики",
-      "Увеличить engagement в фитнесе", "Улучшить точность данных на 25%", "Завоевать 10% рынка craft beer",
-      "Снизить эмиссии на 50%", "Достичь 100k подписчиков на app", "Сделать VR mainstream",
-      "Стать топ‑брендом для pets", "Нулевой tolerance к фроду", "Увеличить shelf life",
-      "Покрыть 20% рынка солнечных", "Снизить dropout до 10%", "Лидерство в fast fashion",
-      "Увеличить урожайность на 15%", "Достичь Hi‑Fi стандартов", "Расширить дистрибуцию добавок",
-      "Обеспечить безопасность туров", "Сделать декор аллерго‑free", "Покрыть 90% регионов",
-      "Увеличить повторные визиты на 40%", "Привлечь 5 млн инвестиций", "Стать органик‑лидером",
-      "Снизить аварии на 20%", "Улучшить концентрацию учеников", "Достичь устойчивости в производстве",
-      "Очистить 1 млн литров воды", "Выпустить хит‑игру", "Расширить сеть клиник",
-      "Масштабировать до enterprise", "Достичь 1 тонны продаж кофе", "Снизить трафик на 15%",
-      "Лидер в skincare", "Хранить 100% энергии", "100k SaaS‑подписчиков",
-      "Обеспечить свежесть на 100%", "Персонализировать 80% туров"
-    ];
-
-    const colors = [
-      "Green / #008000", "Blue / #0000FF", "Red / #FF0000", "Yellow / #FFFF00", "Purple / #800080",
-      "Orange / #FFA500", "Pink / #FFC0CB", "Teal / #008080", "Indigo / #4B0082", "Lime / #00FF00",
-      "Cyan / #00FFFF", "Magenta / #FF00FF", "Brown / #A52A2A", "Gray / #808080", "Navy / #000080",
-      "Olive / #808000", "Maroon / #800000", "Turquoise / #40E0D0", "Violet / #EE82EE", "Gold / #FFD700",
-      "Silver / #C0C0C0", "Beige / #F5F5DC", "Coral / #FF7F50", "Lavender / #E6E6FA", "Mint / #98FB98",
-      "Salmon / #FA8072", "Khaki / #F0E68C", "Plum / #DDA0DD", "Azure / #F0FFFF", "Crimson / #DC143C",
-      "Fuchsia / #FF00FF", "Chartreuse / #7FFF00", "Orchid / #DA70D6", "Sienna / #A0522D",
-      "Thistle / #D8BFD8", "Tomato / #FF6347", "Wheat / #F5DEB3", "Aquamarine / #7FFFD4",
-      "Bisque / #FFE4C4", "CadetBlue / #5F9EA0", "DarkGoldenrod / #B8860B", "FireBrick / #B22222",
-      "ForestGreen / #228B22", "HotPink / #FF69B4", "IndianRed / #CD5C5C", "LightSeaGreen / #20B2AA",
-      "MediumSpringGreen / #00FA9A", "OliveDrab / #6B8E23", "Peru / #CD853F", "RoyalBlue / #4169E1"
+    // Логичные кейсы: компания + продукт + позиционирование связаны по домену (индустрии)
+    const caseDomains = [
+      {
+        company: "CodeCraft Software",
+        positioning: "Надежное ПО для бизнеса любого масштаба",
+        products: ["CRM‑система", "AI‑платформа для автоматизации", "SaaS‑платформа", "BI‑инструменты"],
+        designProblems: ["Устаревший логотип не отражает современный бренд", "Несоответствие цветовой палитры в UI/UX", "Перегруженный интерфейс с лишними элементами", "Плохая визуализация данных в дашбордах", "Проблемы с навигацией в веб‑приложении", "Несогласованность иконок в приложении"],
+        marketingProblems: ["Низкий трафик на сайт из поисковиков", "Слабый B2B lead nurturing", "Низкая видимость в поисковых системах", "Проблемы с сегментацией аудитории", "Слабый engagement в контент‑маркетинге", "Высокий cost per click"],
+        tasks: ["Разработать кампанию по повышению бренд‑осведомленности", "Проанализировать конкурентов и предложить дифференциацию", "Создать контент для B2B‑аудитории", "Улучшить программу лояльности клиентов", "Облачный B2B‑маркетинг"],
+        goals: ["Увеличить долю рынка на 15%", "Достичь 100k SaaS‑подписчиков", "Улучшить точность данных на 25%", "Масштабировать до enterprise", "Обеспечить 99.9% uptime"],
+        colors: ["Blue / #0000FF", "Teal / #008080", "Navy / #000080", "Indigo / #4B0082"]
+      },
+      {
+        company: "BrewBuddy Coffee",
+        positioning: "Кофе для бодрого старта дня",
+        products: ["Кофейные зерна премиум‑класса", "Готовый холодный кофе", "Кофейные капсулы", "Подарочные наборы кофе"],
+        designProblems: ["Скучный визуальный стиль упаковки", "Устаревший дизайн баннеров", "Отсутствие уникального маскота", "Низкое качество изображений на сайте", "Несогласованность цветов в палитре", "Плохая композиция landing page"],
+        marketingProblems: ["Низкие продажи в offseason", "Слабый бренд‑awareness", "Высокий cart abandonment", "Низкий engagement в соцсетях", "Проблемы с сезонным маркетингом", "Конкуренция в e‑commerce"],
+        tasks: ["Кофейный брендинг", "Создать сезонную промо‑стратегию", "Разработать кампанию по повышению бренд‑осведомленности", "Улучшить программу лояльности клиентов", "Маркетинг для кофейной аудитории"],
+        goals: ["Достичь 1 тонны продаж кофе в месяц", "Увеличить повторные покупки на 40%", "Расширить онлайн‑присутствие", "Увеличить долю рынка на 15%", "Повысить продажи в offseason на 20%"],
+        colors: ["Brown / #A52A2A", "Sienna / #A0522D", "Maroon / #800000", "DarkGoldenrod / #B8860B"]
+      },
+      {
+        company: "GlowBeauty Cosmetics",
+        positioning: "Натуральная косметика для сияющей кожи",
+        products: ["Кремы для лица", "Сыворотки для кожи", "Маски для лица", "Наборы для ухода"],
+        designProblems: ["Устаревшие иллюстрации в мерче", "Низкая привлекательность обложек", "Плохая интеграция видео в интерфейс", "Отсутствие 3D‑элементов для продуктов", "Конфликт стилей в соцсетях", "Слабый дизайн упаковки"],
+        marketingProblems: ["Слабый охват в influencer‑маркетинге", "Низкие конверсии из соцсетей", "Проблемы с персонализацией предложений", "Высокий churn rate подписчиков", "Слабый viral эффект кампаний", "Низкий NPS score"],
+        tasks: ["Кампания по уходу за кожей", "Уход за кожей маркетинг", "Разработать influencer‑стратегию", "Создать контент для соцсетей", "Улучшить программу лояльности"],
+        goals: ["Достичь 5 млн продаж косметики", "Лидер в skincare", "Увеличить retention до 70%", "Расширить онлайн‑присутствие", "Увеличить долю рынка на 15%"],
+        colors: ["Pink / #FFC0CB", "HotPink / #FF69B4", "Lavender / #E6E6FA", "Coral / #FF7F50"]
+      },
+      {
+        company: "FitTrack Gear",
+        positioning: "Спортивное оборудование для активного образа жизни",
+        products: ["Фитнес‑трекеры", "Протеиновые шейкеры", "Йога‑маты и аксессуары", "Спортивная одежда"],
+        designProblems: ["Отсутствие анимаций для вовлечения", "Проблемы с responsive дизайном", "Слабый фокус на CTA", "Устаревший стиль икон‑сета", "Плохая визуальная иерархия", "Несовместимость с dark mode"],
+        marketingProblems: ["Низкий engagement в webinars", "Проблемы с сегментацией аудитории", "Слабый user‑generated content", "Высокие затраты на acquisition", "Низкий lifetime value клиентов", "Проблемы с ретаргетингом"],
+        tasks: ["Маркетинг безопасного фитнеса", "Мотивирующий контент для фитнеса", "Разработать UGC‑кампанию", "Создать сезонную промо‑стратегию", "Улучшить программу лояльности"],
+        goals: ["Увеличить engagement в фитнесе", "Минимизировать травмы через образование", "Увеличить retention до 70%", "Достичь 1 млн пользователей", "Расширить онлайн‑присутствие"],
+        colors: ["Lime / #00FF00", "Orange / #FFA500", "Cyan / #00FFFF", "Green / #008000"]
+      },
+      {
+        company: "AdventureQuest Travel",
+        positioning: "Приключенческие туры для искателей адреналина",
+        products: ["Туристические пакеты", "Экскурсионные туры", "Отельные пакеты", "Трекинг‑туры"],
+        designProblems: ["Слабый визуальный storytelling в презентациях", "Устаревший дизайн email‑рассылок", "Низкое качество изображений на сайте", "Отсутствие immersive дизайна", "Плохая композиция landing page", "Несогласованность в UI kits"],
+        marketingProblems: ["Высокий bounce rate на landing pages", "Низкие конверсии из соцсетей", "Проблемы с сезонным маркетингом", "Слабый PR в СМИ", "Высокие затраты на content creation", "Низкий share of voice"],
+        tasks: ["Безопасный туристический маркетинг", "Персонализированный тревел‑маркетинг", "Адаптировать туры под новые регуляции", "Создать контент для соцсетей", "Разработать сезонную промо‑стратегию"],
+        goals: ["Обеспечить безопасность туров", "Персонализировать 80% туров", "Увеличить повторные визиты на 40%", "Расширить онлайн‑присутствие", "Достичь 1 млн пользователей"],
+        colors: ["Turquoise / #40E0D0", "Teal / #008080", "Coral / #FF7F50", "Gold / #FFD700"]
+      },
+      {
+        company: "StyleForge Apparel",
+        positioning: "Современная мода для уверенных в себе людей",
+        products: ["Линейка уличной одежды", "Аксессуары для одежды", "Сумки и рюкзаки", "Коллекция базовых вещей"],
+        designProblems: ["Конфликт стилей в соцсетях", "Устаревшие иллюстрации в мерче", "Несовместимость брендбука с новыми продуктами", "Слабый дизайн инфографики", "Проблемы с white space в layouts", "Низкая привлекательность обложек"],
+        marketingProblems: ["Отток аудитории в соцсетях", "Конкуренция в e‑commerce", "Слабый influencer‑маркетинг", "Низкие подписки на newsletter", "Проблемы с A/B‑тестированием", "Высокий cart abandonment"],
+        tasks: ["Трендовый маркетинг моды", "Устойчивый фэшн‑маркетинг", "Создать контент для соцсетей", "Разработать influencer‑стратегию", "Проанализировать конкурентов"],
+        goals: ["Лидерство в fast fashion", "Увеличить долю рынка на 15%", "Расширить онлайн‑присутствие", "Увеличить retention до 70%", "Достичь 1 млн подписчиков"],
+        colors: ["Black / #000000", "Magenta / #FF00FF", "Silver / #C0C0C0", "Gold / #FFD700"]
+      },
+      {
+        company: "GreenLeaf Energy",
+        positioning: "Возобновляемая энергия для зеленого мира",
+        products: ["Солнечные панели", "Инверторы для солнечных систем", "Батареи для хранения энергии", "Умные термостаты"],
+        designProblems: ["Устаревший логотип не отражает экологичность", "Отсутствие motion design в промо", "Плохая визуализация данных в дашбордах", "Слабый дизайн инфографики", "Несогласованность цветов в палитре", "Проблемы с доступностью"],
+        marketingProblems: ["Слабый бренд‑awareness", "Проблемы с B2B lead nurturing", "Низкая видимость в поисковых системах", "Высокие затраты на acquisition", "Проблемы с маркетинг‑автоматизацией", "Низкий share of voice"],
+        tasks: ["Продвигать зелёные инициативы", "Продвигать энергоэффективность", "Продвижение солнечной энергии", "Энерго‑хранение продвижение", "Разработать B2B‑кампанию"],
+        goals: ["Стать лидером в зеленой энергии", "Снизить энергопотребление на 30%", "Покрыть 20% рынка солнечных", "Хранить 100% энергии", "Привлечь 5 млн инвестиций"],
+        colors: ["Green / #008000", "Teal / #008080", "Lime / #00FF00", "ForestGreen / #228B22"]
+      },
+      {
+        company: "PetPals Supplies",
+        positioning: "Качественные товары для любимых питомцев",
+        products: ["Корм для собак", "Аксессуары для питомцев", "Игрушки для кошек", "Наборы для ухода"],
+        designProblems: ["Отсутствие уникального маскота", "Скучный визуальный стиль упаковки", "Низкая привлекательность обложек", "Устаревший дизайн баннеров", "Конфликт стилей в соцсетях", "Проблемы с white space"],
+        marketingProblems: ["Слабый охват в influencer‑маркетинге", "Низкие конверсии из соцсетей", "Проблемы с сегментацией аудитории", "Высокий churn rate подписчиков", "Слабый user‑generated content", "Низкий NPS score"],
+        tasks: ["Кампании для владельцев питомцев", "Разработать influencer‑стратегию", "Создать UGC‑кампанию", "Улучшить программу лояльности", "Создать контент для соцсетей"],
+        goals: ["Стать топ‑брендом для pets", "Увеличить retention до 70%", "Расширить онлайн‑присутствие", "Увеличить долю рынка на 15%", "Достичь 1 млн подписчиков"],
+        colors: ["Orange / #FFA500", "Brown / #A52A2A", "Green / #008000", "Gold / #FFD700"]
+      },
+      {
+        company: "EduQuest Learning",
+        positioning: "Интерактивное обучение для детей и взрослых",
+        products: ["Онлайн‑курсы", "Образовательные приложения", "Пазлы для мозга", "Обучающие материалы"],
+        designProblems: ["Плохая читаемость шрифтов на мобильных", "Отсутствие анимаций для вовлечения", "Перегруженный интерфейс", "Проблемы с доступностью", "Слабый дизайн error pages", "Несогласованность иконок"],
+        marketingProblems: ["Высокий churn rate подписчиков", "Низкий engagement в webinars", "Проблемы с retention‑маркетингом", "Слабый lead generation", "Высокие затраты на acquisition", "Низкие подписки на newsletter"],
+        tasks: ["Retention‑стратегии для курсов", "Маркетинг образовательных инструментов", "Разработать кампанию по повышению бренд‑осведомленности", "Улучшить программу лояльности", "Создать контент для соцсетей"],
+        goals: ["Снизить dropout до 10%", "Достичь 1 млн пользователей", "Улучшить концентрацию учеников", "Увеличить retention до 70%", "Расширить онлайн‑присутствие"],
+        colors: ["Blue / #0000FF", "Purple / #800080", "Teal / #008080", "Indigo / #4B0082"]
+      },
+      {
+        company: "GameForge Studios",
+        positioning: "Игровые студии для эпичных приключений",
+        products: ["Видеоигры", "VR‑очки и контент", "Мобильные игры", "Игровые аксессуары"],
+        designProblems: ["Отсутствие immersive дизайна для VR", "Устаревший стиль икон‑сета", "Плохая анимация переходов", "Отсутствие 3D‑элементов", "Слабый motion design в промо", "Проблемы с dark mode"],
+        marketingProblems: ["Низкие метрики в app installs", "Конкуренция в видео‑рекламе", "Слабый viral эффект кампаний", "Высокие затраты на acquisition", "Проблемы с ретаргетингом", "Низкий engagement в соцсетях"],
+        tasks: ["Гейм‑маркетинг", "Разработать viral‑кампанию", "Создать контент для стримеров", "Улучшить программу лояльности", "Маркетинг VR для образования"],
+        goals: ["Выпустить хит‑игру", "Достичь 1 млн пользователей", "Сделать VR mainstream", "Увеличить retention до 70%", "Расширить онлайн‑присутствие"],
+        colors: ["Purple / #800080", "Cyan / #00FFFF", "Magenta / #FF00FF", "Indigo / #4B0082"]
+      }
     ];
 
     let currentRole = "";
     let tg = null;
 
-    // Выбор случайного элемента из массива
     function randomItem(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    // Функция скрывает все страницы и показывает нужную
     function showPage(id) {
       document.querySelectorAll(".page").forEach(p => p.style.display = "none");
       const el = document.getElementById(id);
       el.style.display = "flex";
-      // Создаём звёзды только для генераторов
       if (id === "design" || id === "marketing") createStars(id);
     }
 
     function selectRole(role) {
       currentRole = role;
+      const card = document.querySelector(`#home .card[onclick*="${role}"]`);
+      if (card) {
+        card.classList.add("picked");
+        setTimeout(() => card.classList.remove("picked"), 500);
+      }
       showPage("loading");
     }
 
@@ -548,38 +595,52 @@
       showPage("home");
     }
 
-    // Генерация ТЗ для дизайнера
     function generateDesign() {
-      const c = randomItem(companyNames);
-      const p = randomItem(positionings);
-      const col = randomItem(colors);
-      const prod = randomItem(products);
-      const prob = randomItem(designProblems);
-      document.getElementById("design-tz").innerHTML = `
-        <p class="tz">Компания: ${c}</p>
-        <p class="tz">Позиционирование: ${p}</p>
+      const domain = randomItem(caseDomains);
+      const col = randomItem(domain.colors);
+      const prod = randomItem(domain.products);
+      const prob = randomItem(domain.designProblems);
+      const tzBox = document.getElementById("design-tz");
+      tzBox.classList.remove("reveal");
+      tzBox.innerHTML = `
+        <p class="tz">Компания: ${domain.company}</p>
+        <p class="tz">Позиционирование: ${domain.positioning}</p>
         <p class="tz">Цвет: ${col}</p>
         <p class="tz">Продукт: ${prod}</p>
         <p class="tz">Проблема: ${prob}</p>
       `;
+      tzBox.offsetHeight;
+      tzBox.classList.add("reveal");
+      const img = document.querySelector("#design .gen-img");
+      img.classList.remove("spinning");
+      img.offsetHeight;
+      img.classList.add("spinning");
+      setTimeout(() => img.classList.remove("spinning"), 800);
     }
 
-    // Генерация ТЗ для маркетолога
     function generateMarketing() {
-      const c = randomItem(companyNames);
-      const p = randomItem(positionings);
-      const prod = randomItem(products);
-      const prob = randomItem(marketingProblems);
-      const t = randomItem(tasks);
-      const g = randomItem(goals);
-      document.getElementById("marketing-tz").innerHTML = `
-        <p class="tz">Компания: ${c}</p>
-        <p class="tz">Позиционирование: ${p}</p>
+      const domain = randomItem(caseDomains);
+      const prod = randomItem(domain.products);
+      const prob = randomItem(domain.marketingProblems);
+      const t = randomItem(domain.tasks);
+      const g = randomItem(domain.goals);
+      const tzBox = document.getElementById("marketing-tz");
+      tzBox.classList.remove("reveal");
+      tzBox.innerHTML = `
+        <p class="tz">Компания: ${domain.company}</p>
+        <p class="tz">Позиционирование: ${domain.positioning}</p>
         <p class="tz">Продукт: ${prod}</p>
         <p class="tz">Проблема: ${prob}</p>
         <p class="tz">Задача: ${t}</p>
         <p class="tz">Цель: ${g}</p>
       `;
+      tzBox.offsetHeight;
+      tzBox.classList.add("reveal");
+      const img = document.querySelector("#marketing .gen-img");
+      img.classList.remove("shaking");
+      img.offsetHeight;
+      img.classList.add("shaking");
+      setTimeout(() => img.classList.remove("shaking"), 600);
     }
 
     // Универсальная функция показа алерта через Telegram или стандартный alert
