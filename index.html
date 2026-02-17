@@ -309,7 +309,7 @@
       100% { transform: scale(1.05); filter: brightness(1.1); }
     }
 
-    /* Страница загрузки — POV: карта → поворот → девушка в красном */
+    /* Страница загрузки — рука плавно переходит в девушку */
     #loading {
       background: linear-gradient(180deg, #0a0a12 0%, #1a0a12 100%);
       background-image: url('scene_bg.webp'), linear-gradient(180deg, #0a0a12 0%, #1a0a12 100%);
@@ -323,7 +323,7 @@
       position: relative;
       width: 100%;
       max-width: 360px;
-      min-height: 45vh;
+      min-height: 50vh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -334,27 +334,32 @@
       width: clamp(220px, 55vw, 340px);
       max-height: 52vh;
       object-fit: contain;
-      margin: 12px 0 20px;
+      object-position: center bottom;
     }
 
+    /* Рука (как на главной) — уходит вниз и растворяется */
+    #loading .scene-wrap img.hand {
+      width: clamp(200px, 48vw, 280px);
+      animation: handToGirl 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Девушка — проявляется на месте руки */
     #loading .scene-wrap img.dealer {
-      animation: dealerReveal 3s ease-out forwards, dealerWave 2.5s ease-in-out 3s infinite;
+      animation: girlReveal 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards, dealerWave 2.5s ease-in-out 2.2s infinite;
     }
 
-    #loading .scene-wrap img.scene-card {
-      animation: cardPickFade 2.5s ease-out forwards;
+    @keyframes handToGirl {
+      0%   { opacity: 1; transform: translate(0, 0) scale(1); filter: brightness(1); }
+      30%  { opacity: 1; transform: translate(-15px, 0) scale(1); }
+      60%  { opacity: 0.4; transform: translate(-35px, 20px) scale(0.9); filter: brightness(0.7); }
+      100% { opacity: 0; transform: translate(-50px, 40px) scale(0.82); filter: brightness(0.5); pointer-events: none; }
     }
 
-    @keyframes cardPickFade {
-      0% { opacity: 1; transform: scale(1); }
-      60% { opacity: 1; transform: scale(1.02); }
-      100% { opacity: 0; transform: scale(1.1); }
-    }
-
-    @keyframes dealerReveal {
-      0% { opacity: 0; transform: translateX(30px) scale(0.95); }
-      50% { opacity: 0.3; }
-      100% { opacity: 1; transform: translateX(0) scale(1); }
+    @keyframes girlReveal {
+      0%   { opacity: 0; transform: translate(40px, 20px) scale(0.92); filter: blur(6px); }
+      40%  { opacity: 0.2; transform: translate(25px, 10px) scale(0.95); filter: blur(3px); }
+      70%  { opacity: 0.85; transform: translate(8px, 2px) scale(0.98); filter: blur(0); }
+      100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
     }
 
     @keyframes dealerWave {
@@ -549,10 +554,10 @@
     <p class="pick-hint">Выберите карту</p>
   </div>
 
-  <!-- Страница загрузки: сцена 1 (карта) → сцена 2 (девушка в красном) -->
+  <!-- Страница загрузки: рука (как на главной) плавно переходит в девушку -->
   <div id="loading" class="page">
     <div class="scene-wrap">
-      <img src="scene_card.webp" class="scene-card" alt="Выбор карты" onerror="this.style.display='none';this.nextElementSibling.style.animation='dealerReveal 0.6s ease-out forwards, dealerWave 2.5s ease-in-out 0.6s infinite'" />
+      <img src="home_hand.png" class="hand" alt="" onerror="this.style.display='none';this.nextElementSibling.style.animation='girlReveal 0.8s ease-out forwards, dealerWave 2.5s ease-in-out 0.8s infinite'" />
       <img src="scene_dealer.webp" class="dealer" alt="Дилер приглашает" onerror="this.style.display='none'" />
     </div>
     <div class="dialog">
