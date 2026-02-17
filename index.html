@@ -1,1430 +1,207 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
-  />
-  <title>Казино-генератор кейсов</title>
-
-  <!-- Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <style>
-    :root{
-      --bg:#0b0e14;
-      --panel2: rgba(10, 12, 18, .78);
-      --text:#e8edf8;
-      --muted: rgba(232,237,248,.72);
-      --gold:#d4af37;
-      --stroke: rgba(255,255,255,.12);
-      --shadow: 0 18px 45px rgba(0,0,0,.45);
-      --radius: 18px;
-      --btnH: 50px;
-      --maxW: 520px;
-    }
-
-    *{box-sizing:border-box;}
-    html,body{height:100%; margin:0; padding:0; background: var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
-    button, input{font-family: inherit;}
-    button{touch-action: manipulation;}
-    img{max-width:100%; height:auto; display:block;}
-    .app{
-      min-height:100%;
-      padding:
-        calc(14px + env(safe-area-inset-top))
-        14px
-        calc(16px + env(safe-area-inset-bottom))
-        14px;
-      display:flex;
-      justify-content:center;
-      align-items:stretch;
-    }
-    .shell{
-      width:100%;
-      max-width: var(--maxW);
-      min-height: calc(100vh - 30px);
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .chip{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12px;
-      line-height: 1;
-      color: var(--muted);
-      white-space:nowrap;
-    }
-    .chip strong{color: var(--text); font-weight: 650;}
-
-    .content{
-      flex:1;
-      min-height:0;
-      border:1px solid var(--stroke);
-      background: var(--panel2);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      position:relative;
-    }
-    .screen{
-      position:absolute;
-      inset:0;
-      display:none;
-      flex-direction:column;
-      min-height:0;
-    }
-    .screen.active{display:flex;}
-
-    .scroll{
-      flex:1;
-      min-height:0;
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-      padding: 16px;
-      display:flex;
-      flex-direction:column;
-      gap: 14px;
-      position:relative;
-      z-index: 2;
-    }
-
-    .dialog{
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.55);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-    }
-    .dialogTitle{
-      font-weight: 900;
-      letter-spacing:.2px;
-      font-size: 14px;
-      margin:0 0 6px 0;
-    }
-    .dialogText{
-      margin:0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .btnRow{display:flex; gap: 10px; flex-wrap:wrap;}
-    .btn{
-      height: var(--btnH);
-      border-radius: 14px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      padding: 0 14px;
-      font-weight: 800;
-      letter-spacing:.2px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      flex: 1 1 140px;
-      min-width: 140px;
-    }
-    .btn:active{transform: translateY(1px);}
-    .btn.primary{
-      border-color: rgba(212,175,55,.45);
-      background: linear-gradient(180deg, rgba(212,175,55,.18), rgba(255,255,255,.06));
-    }
-    .btn.danger{
-      border-color: rgba(216,27,58,.4);
-      background: linear-gradient(180deg, rgba(216,27,58,.16), rgba(255,255,255,.06));
-    }
-
-    .toast{
-      position:absolute;
-      left: 50%;
-      bottom: calc(14px + env(safe-area-inset-bottom));
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.72);
-      border: 1px solid var(--stroke);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      box-shadow: 0 18px 40px rgba(0,0,0,.5);
-      display:none;
-      max-width: calc(100% - 24px);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      backdrop-filter: blur(8px);
-      z-index: 50;
-    }
-    .toast.show{display:block; animation: toastIn .18s ease-out;}
-    @keyframes toastIn{
-      from{opacity:0; transform: translateX(-50%) translateY(8px);}
-      to{opacity:1; transform: translateX(-50%) translateY(0);}
-    }
-
-    /* ---------- BACKGROUNDS (your images) ---------- */
-    .bgLayer{
-      position:absolute;
-      inset:0;
-      z-index: 0;
-      pointer-events:none;
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
-      transform: translateZ(0);
-    }
-    .bgHome{ background-image: url("home_bg.webp"); }
-    .bgScene{ background-image: url("scene_bg.webp"); }
-    .bgDesign{ background-image: url("design_bg.webp"); }
-    .bgMarketing{ background-image: url("marketing_bg.webp"); }
-
-    /* dark overlay so text always readable */
-    .shade{
-      position:absolute;
-      inset:0;
-      z-index:1;
-      pointer-events:none;
-      background:
-        radial-gradient(1200px 600px at 50% 20%, rgba(0,0,0,.15), rgba(0,0,0,.55)),
-        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.50));
-    }
-
-    /* ---------- HOME scene layout ---------- */
-    .homeStage{
-      position:relative;
-      flex:1;
-      min-height:0;
-      overflow:hidden;
-    }
-    .homeGrid{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap: 14px;
-      padding: 16px;
-      min-height: 520px;
-    }
-    .cardsRow{
-      display:flex;
-      gap: 14px;
-      justify-content:center;
-      align-items:flex-end;
-      padding-bottom: 18px;
-      flex-wrap:nowrap;
-      position:relative;
-      z-index: 3;
-    }
-
-    /* Card as BUTTON with background image (most reliable click) */
-    .cardBtn{
-      width: min(44vw, 190px);
-      max-width: 190px;
-      aspect-ratio: 2.5 / 3.5;
-      border: 0;
-      padding: 0;
-      border-radius: 18px;
-      background: center/cover no-repeat;
-      box-shadow: 0 18px 35px rgba(0,0,0,.35);
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-      position:relative;
-      overflow:hidden;
-    }
-    .cardBtn:active{transform: translateY(1px);}
-    .cardBtn::after{
-      content:"";
-      position:absolute;
-      inset:-40%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.40), transparent);
-      transform: rotate(20deg) translateX(-40%);
-      animation: shine 3.2s linear infinite;
-      opacity:.55;
-      pointer-events:none;
-    }
-    @keyframes shine{
-      0%{transform: rotate(20deg) translateX(-60%);}
-      100%{transform: rotate(20deg) translateX(60%);}
-    }
-    #cardM{ background-image: url("card_marketing.webp"); }
-    #cardD{ background-image: url("card_design.webp"); }
-
-    /* Hand overlay (PNG) */
-    .handImg{
-      position:absolute;
-      right: -22px;
-      bottom: -10px;
-      width: min(58vw, 280px);
-      max-width: 280px;
-      pointer-events:none;
-      filter: drop-shadow(0 20px 35px rgba(0,0,0,.35));
-      z-index: 2;
-    }
-
-    /* ---------- Scene 2 overlays ---------- */
-    .sceneStage{
-      position:relative;
-      flex:1;
-      min-height:0;
-      overflow:hidden;
-    }
-    .sceneWrap{
-      min-height: 520px;
-      display:flex;
-      flex-direction:column;
-      gap: 14px;
-    }
-    .sceneImgRow{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding-top: 6px;
-    }
-    .sceneCardPick{
-      width: min(92%, 440px);
-      border-radius: 18px;
-      box-shadow: 0 18px 40px rgba(0,0,0,.40);
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.2);
-    }
-    .sceneCardPick img{
-      width: 100%;
-      height: auto;
-      display:block;
-    }
-
-    .dealerBox{
-      position:relative;
-      width: min(92%, 440px);
-      margin: 0 auto;
-      border-radius: 18px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 18px 40px rgba(0,0,0,.40);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity .28s ease, transform .28s ease;
-    }
-    .dealerBox.show{opacity:1; transform: translateY(0);}
-    .dealerBox img{width:100%; height:auto; display:block;}
-
-    /* ---------- Titles ---------- */
-    h1{margin:0; font-size: 18px; line-height: 1.15; letter-spacing:.2px;}
-    .sub{margin:0; color: var(--muted); font-size: 13px; line-height: 1.35;}
-
-    /* ---------- Machines ---------- */
-    .machineRow{display:flex; justify-content:center; align-items:center; padding: 6px 0 2px; position:relative; z-index:2;}
-
-    /* Design: slot image + live reels on top */
-    .slotStage{
-      width: min(92%, 440px);
-      position:relative;
-      border-radius: 22px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 22px 45px rgba(0,0,0,.45);
-      background: rgba(0,0,0,.25);
-    }
-    .slotBgImg{
-      width:100%;
-      height:auto;
-      display:block;
-      opacity:.98;
-    }
-    /* Overlay panel that holds reels + lever */
-    .slotOverlay{
-      position:absolute;
-      inset:0;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start;
-      padding: 14px 14px 16px;
-      gap: 10px;
-    }
-    .slotTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .slotBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size: 12px;
-      color: rgba(212,175,55,.92);
-      font-weight: 900;
-      letter-spacing:.35px;
-      white-space:nowrap;
-      text-shadow: 0 10px 18px rgba(0,0,0,.35);
-    }
-    .slotLever{
-      width: 92px;
-      height: 44px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.25);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 10px;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-      padding: 0 12px;
-      box-shadow: 0 10px 22px rgba(0,0,0,.35);
-    }
-    .slotLever:active{transform: translateY(1px);}
-    .leverKnob{
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.22));
-      border: 1px solid rgba(255,255,255,.18);
-      box-shadow: 0 10px 20px rgba(0,0,0,.35);
-    }
-    .leverText{
-      font-size: 12px;
-      font-weight: 900;
-      color: rgba(232,237,248,.78);
-      letter-spacing:.2px;
-      white-space:nowrap;
-    }
-    .slotReels{
-      margin-top: 6px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 10px;
-      padding: 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(6px);
-    }
-    .reel{
-      width: 70px;
-      height: 74px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      box-shadow: 0 10px 22px rgba(0,0,0,.35);
-    }
-    .reelNum{
-      font-weight: 950;
-      font-size: 34px;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,.92);
-      text-shadow: 0 8px 18px rgba(0,0,0,.45);
-    }
-    .reel.spin .reelNum{animation: spin .48s ease-in-out;}
-    @keyframes spin{
-      0%{transform: translateY(0); opacity:1;}
-      30%{transform: translateY(12px); opacity:.55;}
-      60%{transform: translateY(-10px); opacity:.7;}
-      100%{transform: translateY(0); opacity:1;}
-    }
-
-    /* Marketing: image cup + live dice faces */
-    .diceStage{
-      width: min(92%, 440px);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 22px 45px rgba(0,0,0,.45);
-      background: rgba(0,0,0,.22);
-      overflow:hidden;
-      padding: 14px;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
-    .row{display:flex; gap: 10px; align-items:center; flex-wrap:wrap; justify-content:space-between;}
-    .diceRow{display:flex; align-items:center; justify-content:center; gap: 12px; flex-wrap:nowrap;}
-
-    .cupBtn{
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-      width: 118px;
-      height: 90px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      box-shadow: 0 10px 22px rgba(0,0,0,.30);
-    }
-    .cupBtn img{width:100%; height:100%; object-fit:cover;}
-
-    .diceBtn{
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-      display:flex;
-      gap: 12px;
-      align-items:center;
-    }
-    .dice{
-      width: 74px;
-      height: 74px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      position:relative;
-      overflow:hidden;
-      box-shadow: 0 14px 30px rgba(0,0,0,.35);
-    }
-    .pip{
-      position:absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.92);
-      box-shadow: 0 8px 18px rgba(0,0,0,.35);
-      opacity:0;
-    }
-    .dice.spin{animation: diceSpin .35s ease;}
-    @keyframes diceSpin{
-      0%{transform: rotate(0) translateY(0);}
-      45%{transform: rotate(8deg) translateY(-2px);}
-      100%{transform: rotate(0) translateY(0);}
-    }
-
-    /* ---------- Brief + checks ---------- */
-    .brief{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      border-radius: var(--radius);
-      padding: 14px;
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      position:relative;
-      z-index:2;
-    }
-    .kv{
-      display:flex;
-      gap: 10px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
-    .k{
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      min-width: 140px;
-    }
-    .v{
-      flex: 1 1 220px;
-      font-size: 13px;
-      line-height: 1.35;
-      font-weight: 750;
-      word-break: break-word;
-      min-width: 180px;
-      text-align:left;
-    }
-    .emptyHint{color: rgba(232,237,248,.55); font-size: 12.5px; line-height: 1.35;}
-
-    .checks{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      border-radius: var(--radius);
-      padding: 12px;
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      position:relative;
-      z-index:2;
-    }
-    .checksTitle{
-      font-size: 12px;
-      font-weight: 950;
-      letter-spacing:.25px;
-      color: rgba(232,237,248,.78);
-      margin:0;
-    }
-    .checkGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .check{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      border-radius: 14px;
-      padding: 10px 10px;
-      min-height: 46px;
-    }
-    .check input{width: 18px; height: 18px; accent-color: var(--gold); flex: 0 0 auto;}
-    .check span{
-      font-size: 13px;
-      font-weight: 800;
-      color: rgba(232,237,248,.9);
-      line-height: 1.2;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .otherRow{display:flex; gap: 10px; align-items:center; flex-wrap:wrap;}
-    .otherInput{
-      flex: 1 1 220px;
-      min-width: 190px;
-      height: 46px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.25);
-      color: var(--text);
-      padding: 0 12px;
-      font-size: 13px;
-      outline:none;
-    }
-    .otherInput::placeholder{color: rgba(232,237,248,.42);}
-
-    .footerBar{
-      padding: 14px 16px 16px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      position:relative;
-      z-index: 5;
-    }
-
-    @media (max-width: 360px){
-      .btn{min-width: 120px;}
-      .reel{width: 64px; height: 70px;}
-      .checkGrid{grid-template-columns: 1fr;}
-      .k{min-width: 120px;}
-      .v{min-width: 160px;}
-      .handImg{width:min(62vw, 260px);}
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор кейсов: Маркетолог или Дизайнер?</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: white; overflow: hidden; }
+        .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; }
+        #home { background-image: url('home_bg.webp'); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #home .hand { position: absolute; bottom: 20%; width: 30%; animation: deal 2s ease-in-out; }
+        @keyframes deal { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+        #home .cards { display: flex; justify-content: space-around; width: 80%; margin-top: 20%; }
+        #home .card { width: 20%; cursor: pointer; }
+        #loading { background-image: url('scene_bg.webp'); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #loading .cardpick { width: 40%; margin-bottom: 10%; }
+        #loading .dealer { width: 50%; margin-bottom: 5%; animation: turn 1s ease; }
+        @keyframes turn { 0% { opacity: 0; transform: rotateY(90deg); } 100% { opacity: 1; transform: rotateY(0); } }
+        #loading .buttons { display: flex; justify-content: space-around; width: 80%; }
+        .btn { padding: 10px 20px; background: gold; color: black; border: none; cursor: pointer; border-radius: 5px; }
+        #design, #marketing { background-image: url('design_bg.webp'); /* для design */ text-align: center; padding: 20px; }
+        #marketing { background-image: url('marketing_bg.webp'); /* override для marketing */ }
+        .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: twinkle 2s infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.1; } }
+        #design .slot { width: 40%; cursor: pointer; margin: 20px auto; display: block; }
+        #marketing .cup { width: 30%; position: relative; cursor: pointer; }
+        #marketing .dice { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20%; animation: roll 1s ease; }
+        @keyframes roll { 0% { transform: translate(-50%, -50%) rotate(0); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        .tz { margin: 10px 0; }
+        .checkboxes { margin: 20px 0; }
+        .actions { display: flex; justify-content: space-around; }
+    </style>
 </head>
-
 <body>
-  <div class="app">
-    <div class="shell">
-      <div class="topbar">
-        <div class="brand">
-          <div class="chip"><strong>CASINO</strong> кейсы</div>
-          <div class="chip" id="roleChip">роль: <strong>не выбрана</strong></div>
+    <div id="home" class="page">
+        <img src="home_hand.png" class="hand" alt="Рука дилера">
+        <div class="cards">
+            <img src="card_design.png" class="card" onclick="selectRole('design')" alt="Карта Дизайнер">
+            <img src="card_marketing.png" class="card" onclick="selectRole('marketing')" alt="Карта Маркетолог">
         </div>
-        <div class="chip" id="statusChip">готово</div>
-      </div>
-
-      <div class="content" id="content">
-        <div class="toast" id="toast">Скопировано</div>
-
-        <!-- SCREEN 1: HOME -->
-        <section class="screen active" id="screenHome" aria-label="Домашняя">
-          <div class="homeStage">
-            <div class="bgLayer bgHome"></div>
-            <div class="shade"></div>
-
-            <div class="homeGrid">
-              <div class="dialog">
-                <p class="dialogTitle">Выберите карту</p>
-                <p class="dialogText">Нажмите на любую. Дальше будет сцена, а потом генератор.</p>
-              </div>
-
-              <div class="cardsRow" role="group" aria-label="Выбор карты">
-                <button class="cardBtn" id="cardM" data-role="marketing" aria-label="Карта маркетолога"></button>
-                <button class="cardBtn" id="cardD" data-role="design" aria-label="Карта дизайнера"></button>
-              </div>
-            </div>
-
-            <img class="handImg" src="home_hand.png" alt="" loading="eager" />
-          </div>
-        </section>
-
-        <!-- SCREEN 2: SCENE -->
-        <section class="screen" id="screenScene" aria-label="Сцена">
-          <div class="sceneStage">
-            <div class="bgLayer bgScene"></div>
-            <div class="shade"></div>
-
-            <div class="scroll" style="padding-bottom: 10px;">
-              <div class="sceneWrap">
-                <div class="dialog" id="sceneDialog1">
-                  <p class="dialogTitle">Вы берете карту</p>
-                  <p class="dialogText">Секунда. Дайте крупье подготовить удачу.</p>
-                </div>
-
-                <div class="sceneImgRow">
-                  <div class="sceneCardPick">
-                    <img src="scene_cardpick.webp" alt="" loading="eager" />
-                  </div>
-                </div>
-
-                <div class="dealerBox" id="dealerBox" aria-hidden="true">
-                  <img src="scene_dealer.webp" alt="" loading="eager" />
-                </div>
-
-                <div class="dialog" id="sceneDialog2" style="display:none;">
-                  <p class="dialogTitle">У меня есть пара интересных кейсов для тебя</p>
-                  <p class="dialogText">Скажи слово и я прокручу удачу.</p>
-                  <div class="btnRow" style="margin-top: 12px;">
-                    <button class="btn primary" id="btnGo">Хорошо, идем</button>
-                    <button class="btn" id="btnBack">Я не определился с картой</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SCREEN 3A: DESIGN -->
-        <section class="screen" id="screenDesign" aria-label="Дизайн">
-          <div class="bgLayer bgDesign"></div>
-          <div class="shade"></div>
-
-          <div class="scroll">
-            <div>
-              <h1>Генератор кейсов для дизайнеров</h1>
-              <p class="sub">Сгенерируйте идею для кейса: можно использовать для лого, презентации, мерча или даже брендбука.</p>
-            </div>
-
-            <div class="machineRow">
-              <div class="slotStage" id="slotBox">
-                <img class="slotBgImg" src="design_slot.png" alt="" loading="eager" />
-                <div class="slotOverlay">
-                  <div class="slotTop">
-                    <div class="slotBadge">♠ джекпот по умолчанию</div>
-                    <div class="slotLever" id="slotPull" role="button" aria-label="Дернуть ручку">
-                      <div class="leverKnob"></div>
-                      <div class="leverText">Дернуть</div>
-                    </div>
-                  </div>
-
-                  <div class="slotReels" aria-hidden="true">
-                    <div class="reel"><div class="reelNum" id="reel1">7</div></div>
-                    <div class="reel"><div class="reelNum" id="reel2">7</div></div>
-                    <div class="reel"><div class="reelNum" id="reel3">7</div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="brief" id="designBrief">
-              <div class="kv"><div class="k">Название компании:</div><div class="v" id="d_company"><span class="emptyHint">Нажмите на ручку аппарата.</span></div></div>
-              <div class="kv"><div class="k">Позиционирование:</div><div class="v" id="d_pos">-</div></div>
-              <div class="kv"><div class="k">Основной цвет:</div><div class="v" id="d_color">-</div></div>
-              <div class="kv"><div class="k">Продукт:</div><div class="v" id="d_product">-</div></div>
-              <div class="kv"><div class="k">Проблема:</div><div class="v" id="d_problem">-</div></div>
-            </div>
-
-            <div class="checks" id="designChecks">
-              <p class="checksTitle">Что вы хотите сделать (можно несколько):</p>
-              <div class="checkGrid">
-                <label class="check"><input type="checkbox" value="логотип"><span>логотип</span></label>
-                <label class="check"><input type="checkbox" value="мерч"><span>мерч</span></label>
-                <label class="check"><input type="checkbox" value="брендбук"><span>брендбук</span></label>
-                <label class="check"><input type="checkbox" value="презентацию"><span>презентацию</span></label>
-                <label class="check"><input type="checkbox" value="маскота"><span>маскота</span></label>
-                <label class="check"><input type="checkbox" value="упаковку"><span>упаковку</span></label>
-              </div>
-              <div class="otherRow">
-                <label class="check" style="flex:0 0 auto; padding-right:12px;">
-                  <input type="checkbox" id="chkOther" value="свое">
-                  <span>что-то свое</span>
-                </label>
-                <input class="otherInput" id="otherInput" placeholder="Например: лендинг, гайдлайн для соцсетей, иллюстрации..." />
-              </div>
-              <p class="sub" style="margin:0;">Если выбрано несколько пунктов, я перечислю их в тексте аккуратно.</p>
-            </div>
-          </div>
-
-          <div class="footerBar">
-            <div class="btnRow">
-              <button class="btn primary" id="btnCopyDesign">Скопировать ТЗ</button>
-              <button class="btn danger" id="btnClearDesign">Стереть</button>
-              <button class="btn" id="btnHomeFromDesign">Домой</button>
-            </div>
-            <div class="chip" id="designHint">сначала прокрутите аппарат</div>
-          </div>
-        </section>
-
-        <!-- SCREEN 3B: MARKETING -->
-        <section class="screen" id="screenMarketing" aria-label="Маркетинг">
-          <div class="bgLayer bgMarketing"></div>
-          <div class="shade"></div>
-
-          <div class="scroll">
-            <div>
-              <h1>Генератор кейсов для маркетологов</h1>
-              <p class="sub">Сгенерируйте идею для кейса: можно использовать для презентации, исследования, брендбука, сравнения или любого другого формата.</p>
-            </div>
-
-            <div class="machineRow">
-              <div class="diceStage">
-                <div class="row">
-                  <div class="chip"><strong>кости</strong> + стакан</div>
-                  <div class="chip" id="diceLabel">жмите на кости или стакан</div>
-                </div>
-
-                <div class="diceRow">
-                  <div class="cupBtn" id="cupBtn" role="button" aria-label="Накрыть кости стаканом">
-                    <img src="marketing_cup.png" alt="" loading="eager" />
-                  </div>
-
-                  <div class="diceBtn" id="diceBtn" role="button" aria-label="Бросить кости">
-                    <div class="dice" id="dice1" aria-label="Кость 1"></div>
-                    <div class="dice" id="dice2" aria-label="Кость 2"></div>
-                  </div>
-                </div>
-
-                <p class="sub" style="margin:0; text-align:center;">Каждый раз выпадает случайное сочетание точек. ТЗ тоже меняется.</p>
-              </div>
-            </div>
-
-            <div class="brief" id="marketingBrief">
-              <div class="kv"><div class="k">Название компании:</div><div class="v" id="m_company"><span class="emptyHint">Нажмите на кости или стакан.</span></div></div>
-              <div class="kv"><div class="k">Позиционирование:</div><div class="v" id="m_pos">-</div></div>
-              <div class="kv"><div class="k">Продукт:</div><div class="v" id="m_product">-</div></div>
-              <div class="kv"><div class="k">Проблема:</div><div class="v" id="m_problem">-</div></div>
-              <div class="kv"><div class="k">Задача:</div><div class="v" id="m_task">-</div></div>
-              <div class="kv"><div class="k">Цели компании:</div><div class="v" id="m_goal">-</div></div>
-            </div>
-          </div>
-
-          <div class="footerBar">
-            <div class="btnRow">
-              <button class="btn primary" id="btnCopyMarketing">Скопировать ТЗ</button>
-              <button class="btn danger" id="btnClearMarketing">Стереть</button>
-              <button class="btn" id="btnHomeFromMarketing">Домой</button>
-            </div>
-            <div class="chip" id="marketingHint">сначала бросьте кости</div>
-          </div>
-        </section>
-
-      </div>
+        <p>Выберите карту</p>
     </div>
-  </div>
+    <div id="loading" class="page">
+        <img src="scene_cardpick.webp" class="cardpick" alt="Выбор карты">
+        <img src="scene_dealer.webp" class="dealer" alt="Девушка-дилер">
+        <p>У меня есть пара интересных кейсов для тебя</p>
+        <div class="buttons">
+            <button class="btn" onclick="goToGenerator()">Хорошо, идем</button>
+            <button class="btn" onclick="goHome()">Я не определился с картой</button>
+        </div>
+    </div>
+    <div id="design" class="page">
+        <div class="stars"></div>
+        <h1>Генератор кейсов для дизайнеров</h1>
+        <p>Сгенерируйте идею для кейса: вы можете использовать ее для лого, презентации, мерча или даже брендбука</p>
+        <img src="design_slot.png" class="slot" onclick="generateDesign()" alt="Однорукий джек">
+        <div id="design-tz"></div>
+        <div class="checkboxes">
+            <label><input type="checkbox" value="логотип"> Логотип</label>
+            <label><input type="checkbox" value="мерч"> Мерч</label>
+            <label><input type="checkbox" value="брендбук"> Брендбук</label>
+            <label><input type="checkbox" value="презентация"> Презентация</label>
+            <label><input type="checkbox" value="маскот"> Маскот</label>
+            <label><input type="text" id="custom-design" placeholder="Что-то свое"></label>
+        </div>
+        <div class="actions">
+            <button class="btn" onclick="copyDesignTZ()">Скопировать ТЗ</button>
+            <button class="btn" onclick="clearTZ('design')">Стереть</button>
+            <button class="btn" onclick="goHome()">Домой</button>
+        </div>
+    </div>
+    <div id="marketing" class="page">
+        <div class="stars"></div>
+        <h1>Генератор кейсов для маркетологов</h1>
+        <p>Сгенерируйте идею для кейса: вы можете использовать ее для презентации, исследования, брендбука, сравнения или любого другого кейса</p>
+        <div class="cup" onclick="generateMarketing()">
+            <img src="marketing_cup.png" alt="Перевернутый стакан">
+            <img src="marketing_dice.png" class="dice" alt="Кубики">
+        </div>
+        <div id="marketing-tz"></div>
+        <select id="marketing-type">
+            <option value="презентация">Презентация</option>
+            <option value="исследование">Исследование</option>
+            <option value="брендбук">Брендбук</option>
+            <option value="сравнение">Сравнение</option>
+            <option value="другое">Другое</option>
+        </select>
+        <div class="actions">
+            <button class="btn" onclick="copyMarketingTZ()">Скопировать ТЗ</button>
+            <button class="btn" onclick="clearTZ('marketing')">Стереть</button>
+            <button class="btn" onclick="goHome()">Домой</button>
+        </div>
+    </div>
 
-  <script>
-    // Telegram init (safe)
-    (function initTg(){
-      try{
-        if (window.Telegram && Telegram.WebApp){
-          Telegram.WebApp.ready();
-          Telegram.WebApp.expand();
-          try { Telegram.WebApp.setHeaderColor?.("#0b0e14"); } catch(e){}
-          try { Telegram.WebApp.setBackgroundColor?.("#0b0e14"); } catch(e){}
-        }
-      } catch (e) {}
-    })();
+    <script>
+        // Массивы вариантов
+        const companyNames = ['EcoBloom Solutions', 'TechNova Innovations', 'FreshHarvest Foods', 'UrbanMobility Rides', 'StyleForge Apparel', 'HealthVibe Wellness', 'CodeCraft Software', 'GreenLeaf Energy', 'LuxeHome Interiors', 'FitTrack Gear', 'ByteBridge Networks', 'PureSip Beverages', 'AdventureQuest Travel', 'SmartNest Homes', 'GlowBeauty Cosmetics', 'PowerUp Fitness', 'DataSphere Analytics', 'CraftBrew Masters', 'EcoDrive Autos', 'MindfulMed Health', 'VirtualWorld VR', 'PetPals Supplies', 'FinSecure Banking', 'ArtisanalBake Goods', 'SolarSpark Energy', 'EduQuest Learning', 'FashionFusion Clothes', 'AgriTech Farms', 'SoundWave Audio', 'BioVital Supplements', 'TravelTrek Tours', 'HomeHarmony Decor', 'SpeedNet Internet', 'WellnessWave Spa', 'InnovateHub Tech', 'GourmetGrove Foods', 'AutoElite Cars', 'BrainBoost Education', 'StyleSphere Fashion', 'EcoPure Water', 'GameForge Studios', 'HealthHub Clinics', 'CloudCore Computing', 'BrewBuddy Coffee', 'RideShare Mobility', 'BeautyBloom Skincare', 'EnergyEdge Power', 'SoftServe IT', 'FarmFresh Produce', 'LuxTravel Experiences'];
+        const positionings = ['Экологически чистые решения для устойчивого будущего', 'Инновационные технологии для цифровой трансформации', 'Свежие органические продукты прямо с фермы', 'Удобный и доступный городской транспорт', 'Современная мода для уверенных в себе людей', 'Holistic подход к здоровью и благополучию', 'Надежное ПО для бизнеса любого масштаба', 'Возобновляемая энергия для зеленого мира', 'Элегантный дизайн интерьеров для комфорта', 'Спортивное оборудование для активного образа жизни', 'Безопасные сети для бесперебойной связи', 'Натуральные напитки для ежедневного удовольствия', 'Приключенческие туры для искателей адреналина', 'Умные дома для современной жизни', 'Натуральная косметика для сияющей кожи', 'Фитнес-программы для максимальной эффективности', 'Аналитика данных для умных решений', 'Ремесленное пиво для ценителей вкуса', 'Экологичные автомобили для сознательных водителей', 'Ментальное здоровье через mindfulness практики', 'Иммерсивный VR для развлечений и образования', 'Качественные товары для любимых питомцев', 'Безопасные финансовые услуги для всех', 'Ручная выпечка с традиционными рецептами', 'Солнечная энергия для независимости', 'Интерактивное обучение для детей и взрослых', 'Фьюжн стилей в одежде для креативных', 'Технологии для эффективного земледелия', 'Аудиооборудование для профессионалов', 'Биодобавки для естественного благополучия', 'Персонализированные путешествия по миру', 'Гармоничный декор для уютного дома', 'Быстрый интернет для работы и развлечений', 'Расслабляющие спа-процедуры для релакса', 'Хаб для инноваций в технологиях', 'Гурманские продукты для изысканного вкуса', 'Элитные автомобили для премиум-класса', 'Развитие мозга через образовательные инструменты', 'Сфера стиля для модных трендов', 'Чистая вода для здоровья семьи', 'Игровые студии для эпичных приключений', 'Клиники для комплексного ухода за здоровьем', 'Облачные решения для бизнеса', 'Кофе для бодрого старта дня', 'Общий транспорт для экологичного перемещения', 'Уход за кожей с натуральными ингредиентами', 'Энергия на краю инноваций', 'IT-услуги для мягкой интеграции', 'Свежие продукты с фермы к столу', 'Роскошные путешествия для незабываемых впечатлений'];
+        const products = ['Органические удобрения', 'AI-платформа для автоматизации', 'Свежие овощи и фрукты', 'Электрические скутеры', 'Линейка уличной одежды', 'Йога-маты и аксессуары', 'CRM-система', 'Солнечные панели', 'Мебель для гостиной', 'Фитнес-трекеры', 'VPN-сервисы', 'Энергетические напитки', 'Туристические пакеты', 'Умные термостаты', 'Кремы для лица', 'Протеиновые шейкеры', 'BI-инструменты', 'Крафтовое пиво', 'Электрокары', 'Медитационные приложения', 'VR-очки', 'Корм для собак', 'Мобильный банкинг app', 'Хлеб и пирожные', 'Инверторы для солнечных систем', 'Онлайн-курсы', 'Аксессуары для одежды', 'Дроны для ферм', 'Наушники', 'Витаминные комплексы', 'Экскурсионные туры', 'Подушки и покрывала', 'Роутеры', 'Маски для лица', 'Гаджеты для стартапов', 'Сыры и деликатесы', 'Спортивные машины', 'Пазлы для мозга', 'Сумки и рюкзаки', 'Фильтры для воды', 'Видеоигры', 'Диагностическое оборудование', 'Серверы', 'Кофейные зерна', 'Велосипеды-шеринг', 'Сыворотки для кожи', 'Батареи для хранения энергии', 'SaaS-платформы', 'Молочные продукты', 'Отельные пакеты'];
+        const designProblems = ['Устаревший логотип не отражает современный бренд', 'Несоответствие цветовой палитры в UI/UX', 'Плохая читаемость шрифтов на мобильных устройствах', 'Отсутствие responsive дизайна для разных экранов', 'Скучный визуальный стиль упаковки продуктов', 'Несогласованность иконок в приложении', 'Низкое качество изображений на сайте', 'Перегруженный интерфейс с лишними элементами', 'Отсутствие анимаций для вовлечения пользователей', 'Проблемы с доступностью для людей с нарушениями зрения', 'Устаревший дизайн email-рассылок', 'Несовместимость брендбука с новыми продуктами', 'Слабый визуальный storytelling в презентациях', 'Плохая композиция landing page', 'Отсутствие уникального маскота для бренда', 'Конфликт стилей в соцсетях постах', 'Низкая контрастность текстов и фона', 'Устаревшие иллюстрации в мерче', 'Проблемы с навигацией в веб-приложении', 'Отсутствие единого grid system в дизайне', 'Слабый фокус на ключевых элементах CTA', 'Несовременный дизайн визиток', 'Плохая интеграция видео в интерфейс', 'Отсутствие 3D-элементов для продуктов', 'Конфликты в типографике бренда', 'Устаревший дизайн баннеров', 'Низкое разрешение графики для печати', 'Проблемы с white space в layouts', 'Отсутствие motion design в промо', 'Несогласованность цветов в палитре', 'Слабый дизайн инфографики', 'Плохая визуализация данных в дашбордах', 'Устаревший стиль икон-сета', 'Отсутствие AR-элементов для продуктов', 'Конфликты в бренд-гидлайнах', 'Низкая привлекательность обложек', 'Проблемы с scaling векторной графики', 'Отсутствие immersive дизайна для VR', 'Слабый редизайн старых ассетов', 'Несовместимость с dark mode', 'Плохая анимация переходов', 'Отсутствие custom шрифтов', 'Конфликты в цветовой доступности', 'Устаревший дизайн флаеров', 'Низкое качество рендеров продуктов', 'Проблемы с alignment в grids', 'Отсутствие interactive элементов', 'Слабый дизайн error pages', 'Несогласованность в UI kits', 'Плохая визуальная иерархия'];
+        const marketingProblems = ['Низкий трафик на сайт из поисковиков', 'Слабая конверсия в email-кампаниях', 'Отток аудитории в соцсетях', 'Высокий bounce rate на landing pages', 'Низкий ROI от рекламы', 'Проблемы с сегментацией аудитории', 'Слабый engagement в контент-маркетинге', 'Конкуренция в PPC-рекламе', 'Низкие продажи в offseason', 'Проблемы с лояльностью клиентов', 'Слабый охват в influencer-маркетинге', 'Высокий churn rate подписчиков', 'Низкая видимость в поисковых системах', 'Проблемы с A/B-тестированием', 'Слабый user-generated content', 'Конкуренция на рынке affiliate', 'Низкий CTR в ads', 'Проблемы с персонализацией предложений', 'Слабый viral эффект кампаний', 'Высокие затраты на acquisition', 'Низкий lifetime value клиентов', 'Проблемы с ретаргетингом', 'Слабый PR в СМИ', 'Конкуренция в content SEO', 'Низкие конверсии из соцсетей', 'Проблемы с email deliverability', 'Слабый бренд-awareness', 'Высокий cart abandonment', 'Низкий engagement в webinars', 'Проблемы с партнерствами', 'Слабый lead generation', 'Конкуренция в programmatic ads', 'Низкие отзывы от клиентов', 'Проблемы с маркетинг-автоматизацией', 'Слабый охват в мобильном маркетинге', 'Высокие затраты на content creation', 'Низкий NPS score', 'Проблемы с cross-selling', 'Слабый event-маркетинг', 'Конкуренция в видео-рекламе', 'Низкие подписки на newsletter', 'Проблемы с data privacy в таргетинге', 'Слабый B2B lead nurturing', 'Высокий cost per click', 'Низкий share of voice', 'Проблемы с сезонным маркетингом', 'Слабый omnichannel подход', 'Конкуренция в e-commerce', 'Низкие метрики в app installs', 'Проблемы с crisis management в маркетинге'];
+        const tasks = ['Разработать кампанию по повышению бренд-осведомленности', 'Проанализировать конкурентов и предложить дифференциацию', 'Создать сезонную промо-стратегию', 'Оптимизировать цепочку поставок для маркетинга', 'Переработать визуальную идентичность бренда', 'Улучшить программу лояльности клиентов', 'Интегрировать маркетинг с IT-системами', 'Продвигать зеленые инициативы', 'Создать контент для соцсетей по интерьерам', 'Маркетинг безопасного фитнеса', 'Кампания по кибербезопасности', 'Разработать аллерго-дружественный маркетинг', 'Адаптировать туры под новые регуляции', 'Продвигать энергоэффективность', 'Кампания по уходу за кожей', 'Мотивирующий контент для фитнеса', 'Очистка и анализ данных для маркетинга', 'Брендинг ремесленного пива', 'Эко-маркетинг для авто', 'Продвижение mindfulness', 'Маркетинг VR для образования', 'Кампании для владельцев питомцев', 'Антифрод-маркетинг в банкинге', 'Маркетинг свежей выпечки', 'Продвижение солнечной энергии', 'Retention-стратегии для курсов', 'Трендовый маркетинг моды', 'Агро-маркетинг технологий', 'Аудио-брендинг', 'Маркетинг здоровых добавок', 'Безопасный туристический маркетинг', 'Аллерго-безопасный декор-маркетинг', 'Продвижение быстрого интернета', 'Пост-спа маркетинг', 'Фандрайзинг для инноваций', 'Маркетинг натуральных продуктов', 'Безопасный авто-маркетинг', 'Маркетинг образовательных инструментов', 'Устойчивый фэшн-маркетинг', 'Кампании по чистой воде', 'Гейм-маркетинг', 'Доступный мед-маркетинг', 'Облачный B2B-маркетинг', 'Кофейный брендинг', 'Анти-трафик кампании', 'Уход за кожей маркетинг', 'Энерго-хранение продвижение', 'SaaS-маркетинг', 'Свежий продакт-маркетинг', 'Персонализированный тревел-маркетинг'];
+        const goals = ['Увеличить долю рынка на 15%', 'Достичь 1 млн пользователей', 'Повысить продажи в offseason на 20%', 'Сократить затраты на логистику на 10%', 'Обновить бренд-идентичность', 'Увеличить retention до 70%', 'Интегрировать все системы', 'Стать лидером в зеленой энергии', 'Расширить онлайн-присутствие', 'Минимизировать травмы через образование', 'Обеспечить 99.9% uptime', 'Расширить линейку hypoallergenic продуктов', 'Адаптироваться к глобальным изменениям', 'Снизить энергопотребление на 30%', 'Достичь 5 млн продаж косметики', 'Увеличить engagement в фитнесе', 'Улучшить точность данных на 25%', 'Завоевать 10% рынка craft beer', 'Снизить эмиссии на 50%', 'Достичь 100k подписчиков на app', 'Сделать VR mainstream', 'Стать топ-брендом для pets', 'Нулевой tolerance к фроду', 'Увеличить shelf life', 'Покрыть 20% рынка солнечных', 'Снизить dropout до 10%', 'Лидерство в fast fashion', 'Увеличить урожайность на 15%', 'Достичь Hi-Fi стандартов', 'Расширить дистрибуцию добавок', 'Обеспечить безопасность туров', 'Сделать декор аллерго-free', 'Покрыть 90% регионов', 'Увеличить повторные визиты на 40%', 'Привлечь 5 млн инвестиций', 'Стать органик-лидером', 'Снизить аварии на 20%', 'Улучшить концентрацию учеников', 'Достичь устойчивости в производстве', 'Очистить 1 млн литров воды', 'Выпустить хит-игру', 'Расширить сеть клиник', 'Масштабировать до enterprise', 'Достичь 1 тонны продаж кофе', 'Снизить трафик на 15%', 'Лидер в skincare', 'Хранить 100% энергии', '100k SaaS-подписчиков', 'Обеспечить свежесть на 100%', 'Персонализировать 80% туров'];
+        const colors = ['Green / #008000', 'Blue / #0000FF', 'Red / #FF0000', 'Yellow / #FFFF00', 'Purple / #800080', 'Orange / #FFA500', 'Pink / #FFC0CB', 'Teal / #008080', 'Indigo / #4B0082', 'Lime / #00FF00', 'Cyan / #00FFFF', 'Magenta / #FF00FF', 'Brown / #A52A2A', 'Gray / #808080', 'Navy / #000080', 'Olive / #808000', 'Maroon / #800000', 'Turquoise / #40E0D0', 'Violet / #EE82EE', 'Gold / #FFD700', 'Silver / #C0C0C0', 'Beige / #F5F5DC', 'Coral / #FF7F50', 'Lavender / #E6E6FA', 'Mint / #98FB98', 'Salmon / #FA8072', 'Khaki / #F0E68C', 'Plum / #DDA0DD', 'Azure / #F0FFFF', 'Crimson / #DC143C', 'Fuchsia / #FF00FF', 'Chartreuse / #7FFF00', 'Orchid / #DA70D6', 'Sienna / #A0522D', 'Thistle / #D8BFD8', 'Tomato / #FF6347', 'Wheat / #F5DEB3', 'Aquamarine / #7FFFD4', 'Bisque / #FFE4C4', 'CadetBlue / #5F9EA0', 'DarkGoldenrod / #B8860B', 'FireBrick / #B22222', 'ForestGreen / #228B22', 'HotPink / #FF69B4', 'IndianRed / #CD5C5C', 'LightSeaGreen / #20B2AA', 'MediumSpringGreen / #00FA9A', 'OliveDrab / #6B8E23', 'Peru / #CD853F', 'RoyalBlue / #4169E1'];
 
-    const $ = (id) => document.getElementById(id);
-    const toast = $("toast");
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.add("show");
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=> toast.classList.remove("show"), 1200);
-    }
-    function setStatus(text){ $("statusChip").textContent = text; }
+        let currentRole = '';
 
-    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+        function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-    function switchScreen(screenId){
-      const screens = ["screenHome","screenScene","screenDesign","screenMarketing"];
-      screens.forEach(id => $(id).classList.toggle("active", id === screenId));
-      const active = $(screenId);
-      const sc = active.querySelector(".scroll");
-      if (sc) sc.scrollTop = 0;
-    }
-
-    // Data
-    const companyNames = [
-      "Velvet Pine","Neon Harbor","Atlas & Co","Golden Finch","Paper Tiger Studio","North Mint","LumaCraft","Brick & Bloom","Silver Anchor","SoftGrid",
-      "Rocket Apricot","Urban Fern","Moonlit Market","Coral Junction","Quiet Storm Lab","Honey Circuit","Stonewave","Frost & Fire","Citrus Union","Sunline Works",
-      "Cloudberry","Kinetic Owl","Blue Marlin","Amber Avenue","Walnut & Wire","Nova Nectar","Crisp Corner","Granite Fox","Rosewood Road","Lime Ledger",
-      "Nightingale Supply","Pixel Pier","Driftwood Desk","Bloom Barrel","Iron Petal","Maple Metro","Flash & Felt","Copper Kite","Tide & Timber","Arctic Apron",
-      "Prism Pantry","Echo Orchard","Marble Meadow","Spark Station","Cedar Soda","Velvet Valley","Mint Mechanics","Aurora Alley","Lantern Loop","Orbit Orange"
-    ];
-
-    const positioning = [
-      "Премиум без пафоса, просто качественно.","Самый быстрый сервис в нише, без бюрократии.","Доступный продукт, который выглядит дороже своей цены.","Забота о клиенте как у лучших консьержей.",
-      "Честность: без скрытых условий и мелкого шрифта.","Технологично, но по-человечески понятно.","Для тех, кто ценит минимализм и порядок.","Ярко, смело, с характером.",
-      "Экологично, но без морализаторства.","Сделано рядом, локальная гордость.","Экспертность: мы узкие профи, не обо всем сразу.","Лучший выбор для новичков, всё разжевано.",
-      "Для продвинутых, кому важны детали.","Уютный бренд, который хочется рекомендовать.","Дерзкий бренд для тех, кто устал от скучного.","Надежность и стабильность, как швейцарские часы.",
-      "Гибкость: подстроимся под клиента.","Всё под ключ, чтобы клиент не бегал.","Красиво и функционально, без просто красиво.","Нишевый стиль: мы не массовый рынок.",
-      "Сервис 24/7, всегда на связи.","Максимум пользы за минимальное время.","Вдохновляем и упрощаем жизнь.","Комьюнити вокруг бренда, не просто продукт.",
-      "Сильная выгода без ощущения дешевки.","Безопасность и спокойствие клиента на первом месте.","Суперпонятный продукт для занятых людей.","Выбор эстетов, кто любит вау.",
-      "Бренд, который не раздражает, а радует.","Игровой вайб, но профессиональная начинка.","Ставка на результат, а не на процесс.","Индивидуальность: никаких шаблонов.",
-      "Простота: один клик и готово.","Консервативно, солидно, по делу.","Модно и актуально, но без перегиба.","Научный подход, цифры и проверки.",
-      "Теплый тон и человеческий язык.","Для семей и спокойного быта.","Для активной городской жизни.","Для тех, кто любит статус и детали.",
-      "Премиум-опыт даже в мелочах.","Четко, структурно, без лишнего.","Вдохновение из культуры и искусства.","Ремесленный подход: вручную, с душой.",
-      "Суперскорость и оперативность.","Меньше слов, больше дела.","Рациональный выбор, который легко объяснить.","Смелый дизайн, но понятная ценность.",
-      "Традиции, но современная подача.","Мы на твоей стороне, всегда про клиента."
-    ];
-
-    const products = [
-      "Приложение для учета личных финансов.","Доставка фермерских продуктов.","Онлайн-курсы по профессии.","Сервис бронирования мастеров.","Умная подписка на витамины.",
-      "Кофе в дрип-пакетах.","Премиальные корма для животных.","Наборы для домашней пасты.","CRM для малого бизнеса.","Сервис поиска стажировок.",
-      "Маркетплейс локальных брендов.","Платформа для корпоративного обучения.","Сервис аренды техники.","Доставка готовых рационов.","Подписка на книги и аудио.",
-      "Банк рецептов с планированием меню.","Микро-страховки для поездок.","Платформа для проведения вебинаров.","Косметика для чувствительной кожи.","Сервис хранения фото и семейных архивов.",
-      "Умные термокружки и аксессуары.","Магазин дизайнерской мебели.","Онлайн-запись в клиники.","Трекер привычек и сна.","Юридический конструктор договоров.",
-      "Сервис доставки воды и бытовых мелочей.","Билеты и афиша мероприятий.","Приложение для изучения языка.","Сервис поиска жилья на месяц.","Подписка на уход за обувью.",
-      "Эко-упаковка для бизнеса.","Конструктор сайтов без кода.","Продукты для умного дома.","Коворкинг и переговорки по подписке.","Сервис проверки контрагентов.",
-      "Наборы для ухода за бородой.","Спортивная одежда для города.","Подбор психолога онлайн.","Сервис доставки цветов.","Платформа для фриланс-заказов.",
-      "Облачная бухгалтерия.","Доставка редких специй.","Туристические авторские маршруты.","Велопрокат по городу.","Электронные подарочные сертификаты.",
-      "Сервис подбора подарков.","Услуги клининга.","Домашние растения с доставкой.","Платформа для подкастеров.","Приложение для медитации."
-    ];
-
-    const colors = [
-      "Изумрудный #0B8A4A","Сочный лайм #7CFF00","Темный нефрит #0A5A3B","Бордо #6D0F2B","Рубиновый #B0003A",
-      "Кармин #D4002A","Ночной синий #0B1D3A","Королевский синий #1D4ED8","Индиго #3F2E9E","Фиолетовый бархат #4B145E",
-      "Лавандовый #B79DFF","Пудровый розовый #F2B5C6","Персиковый #FFB089","Янтарный #FFB000","Золото #D4AF37",
-      "Песочный #D8C3A5","Кофейный #5A3A2E","Шоколад #3B1F1F","Графит #2B2E34","Угольный #111318",
-      "Серебро #C7CCD6","Молочный #F6F1E8","Белый холодный #F5F8FF","Мятный #7EF2C2","Бирюза #18C7C7",
-      "Морская волна #1F9E93","Оливковый #667A2F","Горчичный #C79A2D","Терракота #C2563B","Коралловый #FF5A5F",
-      "Малиновый #E11D48","Винный #7A1E3A","Сливовый #5B2245","Сиреневый #9B5DE5","Небесный #38BDF8",
-      "Ледяной голубой #A5D8FF","Стальной #6B7280","Медь #B87333","Бронза #8C6239","Латунь #B5A642",
-      "Лимонный #FFF000","Салатовый #A3E635","Хвоя #1B4332","Сапфир #0F52BA","Кобальт #0047AB",
-      "Пастельный беж #E7D7C1","Пыльный розовый #D8A7B1","Теплый серый #A8A29E","Черный лак #050608","Красный неон #FF0033"
-    ];
-
-    const problemsMarketing = [
-      "Лиды идут, но почти никто не покупает.","Стоимость привлечения клиента растет каждый месяц.","Реклама работает нестабильно, нет предсказуемости.","Мы не понимаем, кто наша самая прибыльная аудитория.",
-      "Нет четкого УТП, звучим как все.","Трафик есть, но конверсия на сайте слабая.","Брошенных корзин слишком много.","Люди регистрируются, но не активируются.",
-      "Повторные покупки почти отсутствуют.","Сложно масштабировать текущие каналы.","Партнерские каналы не приносят результата.","Слишком длинный цикл сделки.",
-      "Слабая аналитика, решения принимаются на ощущениях.","Падает вовлеченность в соцсетях.","Мы зависим от одного канала трафика.","Новая аудитория не доверяет бренду.",
-      "Конкуренты агрессивно демпингуют.","Реклама привлекает нецелевой сегмент.","Низкий CTR у объявлений.","Контент не генерирует заявки.",
-      "Слабый оффер, не цепляет.","Нет четкой стратегии продвижения.","Команда маркетинга работает разрозненно.","У нас нет понятной воронки.",
-      "Сложно зайти в новый регион.","Плохо работает e-mail маркетинг.","Люди не понимают ценность продукта.","Снижается органический трафик.",
-      "Нет сильных кейсов для продаж.","Высокий отток подписчиков.","Бренд не запоминается.","Реклама не окупается в нужные сроки.",
-      "Нет системы тестирования гипотез.","Слишком низкий средний чек.","Проблемы с позиционированием при выходе на новый сегмент.","Падает конверсия после редизайна сайта.",
-      "Мало заявок с мобильных устройств.","Неясно, какие каналы реально приносят прибыль.","Отдел продаж жалуется на холодные лиды.","Слабая репутация в отзывах.",
-      "Мы не выделяемся среди конкурентов.","Низкая вовлеченность в рассылках.","Сложно донести сложный продукт простым языком.","Запуск нового продукта прошел без шума.",
-      "Акции и скидки не дают роста продаж.","Низкий LTV по сравнению с рынком.","Сложно выстроить омниканальную стратегию.","Нет четкого бренда работодателя.",
-      "Слабая работа с ретаргетингом.","Мы растем, но прибыль не увеличивается пропорционально."
-    ];
-
-    const problemsDesign = [
-      "У компании нет единого визуального стиля.","Логотип выглядит устаревшим.","Айдентика не отражает позиционирование.","Бренд визуально сливается с конкурентами.",
-      "Сайт выглядит перегруженным и хаотичным.","Нет брендбука, каждый делает как хочет.","Упаковка продукта не продает.","Визуал в соцсетях разный и несистемный.",
-      "Дизайн не вызывает доверия.","Сложно адаптировать стиль под разные носители.","Нет визуального кода, который запоминается.","Слишком много цветов, нет фокуса.",
-      "Шрифты используются хаотично.","Презентации выглядят скучно и шаблонно.","Мерч не хочется носить.","Визуал не передает ценность продукта.",
-      "Иллюстрации выглядят дешево.","Фото-стиль не определен.","Логотип плохо читается в маленьком размере.","Нет адаптации под мобильные устройства.",
-      "Дизайн устарел морально.","Визуал не соответствует целевой аудитории.","Нет системы и модульности в макетах.","Бренд выглядит слишком безликим.",
-      "Цвета не поддерживают эмоцию бренда.","Слишком агрессивный визуальный стиль.","Слишком скучный и стерильный стиль.","Нет единого визуального языка для рекламы.",
-      "Иконки и графика разностильные.","Презентации не продают идею.","Дизайн не отражает премиальность.","Дизайн не отражает доступность.",
-      "Витрина на маркетплейсе выглядит слабее конкурентов.","Носители бренда не узнаются как единое целое.","Нет маскота или визуального персонажа, который можно развивать.","Упаковка теряется на полке.",
-      "Сайт визуально сложен для восприятия.","Не хватает вау-эффекта.","Дизайн слишком сложный в производстве.","Нет гайдлайнов для подрядчиков.",
-      "Слишком много декоративных элементов.","Недостаточно акцентов и иерархии.","Нет визуального контраста.","Бренд не вызывает эмоций.",
-      "Старый фирменный стиль мешает масштабированию.","Визуал не подходит для выхода в новый сегмент.","Дизайн плохо смотрится в темной теме.","Нет адаптивных версий логотипа.",
-      "Бренд не считывается за 3 секунды.","Дизайн не поддерживает маркетинговые задачи."
-    ];
-
-    const tasks = [
-      "Повысить конверсию лендинга в заявку.","Удешевить стоимость лида на 25%.","Запустить позиционирование и обновить месседжи.","Собрать медиаплан на 3 месяца.",
-      "Придумать и протестировать 5 офферов.","Перепаковать продуктовую линейку и тарифы.","Настроить воронку удержания и возврата.","Провести исследование аудитории и сегментацию.",
-      "Сделать план контента на месяц под лиды.","Поднять продажи в несезон.","Увеличить повторные покупки.","Настроить базовую аналитику и атрибуцию.",
-      "Запустить реферальную программу.","Разработать УТП для нового сегмента.","Подготовить стратегию выхода на новый рынок.","Увеличить регистрации, сохранив качество лидов.",
-      "Запустить лид-магнит и сбор базы.","Сделать конкурентный анализ и выводы.","Перезапустить e-mail цепочки.","Поднять вовлеченность в соцсетях без кринжа.",
-      "Сформировать комьюнити вокруг бренда.","Улучшить онбординг в приложении.","Снизить брошенные корзины.","Поднять средний чек через апсейл.",
-      "Запустить PR-повод и инфоповестку.","Сделать стратегию для маркетплейсов.","Настроить связку реклама + квиз.","Провести A/B тесты ключевых экранов.",
-      "Переписать тексты на сайте под ясность и доверие.","Разработать коммуникации для запуска продукта.","Наладить партнерский канал продаж.","Увеличить долю органического трафика.",
-      "Сформировать бренд-гайд по тону коммуникации.","Подготовить презентацию для инвесторов или партнеров.","Упаковать кейсы и доказательства.","Построить стратегию для ретаргетинга.",
-      "Запустить серию вебинаров под продажи.","Подготовить план промо-акций без скидочной ямы.","Снизить отток подписчиков.","Протестировать новый канал привлечения.",
-      "Увеличить долю B2B лидов.","Сделать стратегию коммуникаций в кризис.","Выстроить pipeline гипотез и тестов.","Перезапустить бренд, не потеряв старых клиентов.",
-      "Улучшить карточки товара и витрину.","Поднять NPS и собрать обратную связь.","Сформировать линейку трипваеров.","Придумать механики геймификации.",
-      "Упаковать ценность в 3 простых сообщения.","Пересобрать продуктовую матрицу под прибыль."
-    ];
-
-    const goals = [
-      "Выйти на +30% выручки за квартал.","Удержать CAC в заданном коридоре.","Увеличить долю повторных покупок до 35%.","Снизить отток на 20%.",
-      "Нарастить базу подписчиков на 10 000.","Увеличить средний чек на 15%.","Увеличить конверсию в оплату на 10%.","Запустить новый продукт и получить 1000 продаж.",
-      "Выйти в 2 новых региона.","Сформировать устойчивый органический трафик.","Увеличить узнаваемость в целевой аудитории.","Сократить цикл сделки на 25%.",
-      "Нарастить долю B2B в выручке.","Получить 50 партнеров-реселлеров.","Добиться окупаемости рекламы в пределах 30 дней.","Поднять NPS до 60+.",
-      "Увеличить LTV на 20%.","Снизить возвраты на 15%.","Выйти в топ-3 по нишевым запросам SEO.","Собрать и систематизировать аналитику по всем каналам.",
-      "Увеличить количество лидов на 40%.","Улучшить качество лидов и снизить долю мусора.","Сделать бренд более премиальным в восприятии.","Увеличить долю прямых продаж.",
-      "Увеличить продажи в несезон на 25%.","Запустить комьюнити и получить 500 активных участников.","Увеличить долю рекомендаций.","Выйти на стабильные 3 PR-упоминания в месяц.",
-      "Поднять посещаемость сайта на 50%.","Увеличить конверсию из соцсетей в заявки.","Снизить стоимость лида на 20%.","Выйти на новые сегменты аудитории.",
-      "Увеличить продажи через маркетплейсы.","Укрепить доверие, поднять рейтинг и отзывы.","Увеличить долю повторных оплат подписки.","Достичь 1 млн просмотров контента в месяц.",
-      "Увеличить число регистраций в приложении.","Поднять эффективность ретаргетинга.","Перепаковать офферы и поднять конверсию.","Сформировать единый брендбук и коммуникации.",
-      "Закрыть план продаж по ключевому продукту.","Увеличить долю теплых лидов.","Поднять маржинальность на 5 п.п.","Стабилизировать продажи без постоянных скидок.",
-      "Сформировать линейку лид-магнитов и трипваеров.","Наладить регулярные A/B тесты каждую неделю.","Увеличить количество заявок с мобайла.","Снизить число брошенных корзин.",
-      "Увеличить конверсию онбординга.","Выйти на предсказуемый рост месяц к месяцу."
-    ];
-
-    const state = {
-      role: null,
-      designBrief: null,
-      marketingBrief: null,
-      dice: [6,6]
-    };
-
-    const roleChip = $("roleChip");
-    function setRole(role){
-      state.role = role;
-      roleChip.innerHTML = role === "design"
-        ? 'роль: <strong>дизайнер</strong>'
-        : role === "marketing"
-          ? 'роль: <strong>маркетолог</strong>'
-          : 'роль: <strong>не выбрана</strong>';
-    }
-
-    function startScene(){
-      setStatus("сцена...");
-      switchScreen("screenScene");
-      $("sceneDialog2").style.display = "none";
-      $("dealerBox").classList.remove("show");
-
-      clearTimeout(startScene._t1);
-      clearTimeout(startScene._t2);
-
-      startScene._t1 = setTimeout(()=> $("dealerBox").classList.add("show"), 650);
-      startScene._t2 = setTimeout(()=>{
-        $("sceneDialog2").style.display = "block";
-        setStatus("ожидаю");
-      }, 950);
-    }
-
-    function setDiceFace(el, value){
-      el.innerHTML = "";
-      const pos = {
-        tl:[18,18], tr:[56,18],
-        ml:[18,37], mr:[56,37],
-        bl:[18,56], br:[56,56],
-        c:[37,37]
-      };
-      const layout = {
-        1:["c"], 2:["tl","br"], 3:["tl","c","br"],
-        4:["tl","tr","bl","br"], 5:["tl","tr","c","bl","br"],
-        6:["tl","ml","bl","tr","mr","br"]
-      }[value];
-
-      layout.forEach(key=>{
-        const [x,y] = pos[key];
-        const d = document.createElement("div");
-        d.className = "pip";
-        d.style.left = (x-5) + "px";
-        d.style.top = (y-5) + "px";
-        d.style.opacity = "1";
-        el.appendChild(d);
-      });
-    }
-
-    function rollDice(){
-      const d1 = 1 + Math.floor(Math.random()*6);
-      const d2 = 1 + Math.floor(Math.random()*6);
-      state.dice = [d1,d2];
-
-      const dice1 = $("dice1");
-      const dice2 = $("dice2");
-      dice1.classList.remove("spin");
-      dice2.classList.remove("spin");
-      void dice1.offsetWidth;
-
-      dice1.classList.add("spin");
-      dice2.classList.add("spin");
-
-      setDiceFace(dice1, d1);
-      setDiceFace(dice2, d2);
-
-      $("diceLabel").textContent = `выпало: ${d1} + ${d2}`;
-    }
-
-    function generateDesignBrief(){
-      const brief = {
-        company: pick(companyNames),
-        pos: pick(positioning),
-        color: pick(colors),
-        product: pick(products),
-        problem: pick(problemsDesign)
-      };
-      state.designBrief = brief;
-
-      $("d_company").textContent = brief.company;
-      $("d_pos").textContent = brief.pos;
-      $("d_color").textContent = brief.color;
-      $("d_product").textContent = brief.product;
-      $("d_problem").textContent = brief.problem;
-
-      $("designHint").textContent = "джекпот: ТЗ готово";
-      setStatus("выигрыш");
-      persist();
-    }
-
-    function generateMarketingBrief(){
-      const brief = {
-        company: pick(companyNames),
-        pos: pick(positioning),
-        product: pick(products),
-        problem: pick(problemsMarketing),
-        task: pick(tasks),
-        goal: pick(goals)
-      };
-      state.marketingBrief = brief;
-
-      $("m_company").textContent = brief.company;
-      $("m_pos").textContent = brief.pos;
-      $("m_product").textContent = brief.product;
-      $("m_problem").textContent = brief.problem;
-      $("m_task").textContent = brief.task;
-      $("m_goal").textContent = brief.goal;
-
-      $("marketingHint").textContent = "ставка сыграла: ТЗ готово";
-      setStatus("выигрыш");
-      persist();
-    }
-
-    function spinSlot(){
-      const reels = [
-        $("reel1").parentElement,
-        $("reel2").parentElement,
-        $("reel3").parentElement
-      ];
-      reels.forEach(r=> r.classList.add("spin"));
-      setStatus("крутим...");
-
-      setTimeout(()=>{
-        reels.forEach(r=> r.classList.remove("spin"));
-        $("reel1").textContent = "7";
-        $("reel2").textContent = "7";
-        $("reel3").textContent = "7";
-        generateDesignBrief();
-      }, 520);
-    }
-
-    function getDesignDeliverables(){
-      const checks = [...$("designChecks").querySelectorAll('input[type="checkbox"]')];
-      const selected = [];
-      checks.forEach(ch=>{
-        if (ch.checked){
-          if (ch.id === "chkOther") return;
-          selected.push(ch.value);
-        }
-      });
-
-      const otherChecked = $("chkOther").checked;
-      const otherText = $("otherInput").value.trim();
-      if (otherChecked && otherText){
-        selected.push(otherText);
-      } else if (otherChecked && !otherText){
-        selected.push("что-то свое");
-      }
-
-      if (!selected.length) return "какой-то дизайн-материал";
-      if (selected.length === 1) return selected[0];
-      if (selected.length === 2) return selected[0] + " и " + selected[1];
-      return selected.slice(0, -1).join(", ") + " и " + selected[selected.length - 1];
-    }
-
-    function buildDesignCopyText(){
-      if (!state.designBrief) return null;
-      const b = state.designBrief;
-      const deliverables = getDesignDeliverables();
-
-      return (
-`Привет, я представитель компании ${b.company}. Мы занимаемся в основном реализацией ${b.product} и вот недавно столкнулись со следующей проблемой: ${b.problem}.
-
-Нам срочно нужна твоя помощь! Директор по маркетингу очень просит сделать для нас ${deliverables}. И просит учесть, что ${b.color} - это наш основной цвет, и в целом сам дизайн должен поддерживать наше позиционирование: ${b.pos}.
-
-В целом мы готовы рассмотреть твои предложения по вайбу и общему настроению - мы доверяем тебе как специалисту. Ноль правок! Ждем твое решение!`
-      );
-    }
-
-    function buildMarketingCopyText(){
-      if (!state.marketingBrief) return null;
-      const b = state.marketingBrief;
-
-      return (
-`Привет, я представитель компании ${b.company}. Мы занимаемся в основном реализацией ${b.product} и вот недавно столкнулись со следующей проблемой: ${b.problem}.
-
-Нам срочно нужна твоя помощь! Директор по маркетингу очень просит твоей помощи: помоги решить нашу задачу - ${b.task}.
-
-Думаю, ты и так знаешь, что решение должно коррелироваться с позиционированием (${b.pos}). В этом квартале наша основная цель: ${b.goal}.
-
-Ноль правок! Ждем твое решение!`
-      );
-    }
-
-    async function copyToClipboard(text){
-      try{
-        await navigator.clipboard.writeText(text);
-        showToast("Скопировано в буфер");
-        return true;
-      }catch(e){
-        try{
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          ta.style.position = "fixed";
-          ta.style.left = "-9999px";
-          document.body.appendChild(ta);
-          ta.focus();
-          ta.select();
-          document.execCommand("copy");
-          document.body.removeChild(ta);
-          showToast("Скопировано");
-          return true;
-        }catch(err){
-          showToast("Не получилось скопировать");
-          return false;
-        }
-      }
-    }
-
-    function clearDesign(){
-      state.designBrief = null;
-      $("d_company").innerHTML = '<span class="emptyHint">Нажмите на ручку аппарата.</span>';
-      $("d_pos").textContent = "-";
-      $("d_color").textContent = "-";
-      $("d_product").textContent = "-";
-      $("d_problem").textContent = "-";
-      $("designHint").textContent = "сначала прокрутите аппарат";
-
-      [...$("designChecks").querySelectorAll('input[type="checkbox"]')].forEach(ch=> ch.checked = false);
-      $("otherInput").value = "";
-      setStatus("готово");
-      persist();
-      showToast("Стерто");
-    }
-
-    function clearMarketing(){
-      state.marketingBrief = null;
-      $("m_company").innerHTML = '<span class="emptyHint">Нажмите на кости или стакан.</span>';
-      $("m_pos").textContent = "-";
-      $("m_product").textContent = "-";
-      $("m_problem").textContent = "-";
-      $("m_task").textContent = "-";
-      $("m_goal").textContent = "-";
-      $("marketingHint").textContent = "сначала бросьте кости";
-      $("diceLabel").textContent = "жмите на кости или стакан";
-
-      state.dice = [6,6];
-      setDiceFace($("dice1"), 6);
-      setDiceFace($("dice2"), 6);
-
-      setStatus("готово");
-      persist();
-      showToast("Стерто");
-    }
-
-    const LS_KEY = "casino_cases_v2_imgs_root";
-    function persist(){
-      try{
-        const payload = {
-          role: state.role,
-          designBrief: state.designBrief,
-          marketingBrief: state.marketingBrief,
-          dice: state.dice,
-          checks: [...$("designChecks").querySelectorAll('input[type="checkbox"]')].map(ch=>({id: ch.id || null, v: ch.value, checked: ch.checked})),
-          other: $("otherInput").value
-        };
-        localStorage.setItem(LS_KEY, JSON.stringify(payload));
-      } catch(e){}
-    }
-
-    function restore(){
-      try{
-        const raw = localStorage.getItem(LS_KEY);
-        if (!raw) return;
-        const p = JSON.parse(raw);
-
-        if (p.role) setRole(p.role);
-
-        if (p.checks && Array.isArray(p.checks)){
-          const map = new Map(p.checks.map(x => [x.id ? ("#"+x.id) : ("[value='"+x.v+"']"), x.checked]));
-          [...$("designChecks").querySelectorAll('input[type="checkbox"]')].forEach(ch=>{
-            const key = ch.id ? ("#"+ch.id) : ("[value='"+ch.value+"']");
-            if (map.has(key)) ch.checked = !!map.get(key);
-          });
-        }
-        if (typeof p.other === "string") $("otherInput").value = p.other;
-
-        if (p.dice && Array.isArray(p.dice) && p.dice.length === 2){
-          state.dice = p.dice;
-          setDiceFace($("dice1"), p.dice[0]);
-          setDiceFace($("dice2"), p.dice[1]);
-        } else {
-          setDiceFace($("dice1"), 6);
-          setDiceFace($("dice2"), 6);
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            document.getElementById(id).style.display = 'flex';
+            if (id === 'design' || id === 'marketing') createStars(id);
         }
 
-        if (p.designBrief){
-          state.designBrief = p.designBrief;
-          $("d_company").textContent = p.designBrief.company;
-          $("d_pos").textContent = p.designBrief.pos;
-          $("d_color").textContent = p.designBrief.color;
-          $("d_product").textContent = p.designBrief.product;
-          $("d_problem").textContent = p.designBrief.problem;
-          $("designHint").textContent = "джекпот: ТЗ готово";
+        function selectRole(role) {
+            currentRole = role;
+            showPage('loading');
         }
 
-        if (p.marketingBrief){
-          state.marketingBrief = p.marketingBrief;
-          $("m_company").textContent = p.marketingBrief.company;
-          $("m_pos").textContent = p.marketingBrief.pos;
-          $("m_product").textContent = p.marketingBrief.product;
-          $("m_problem").textContent = p.marketingBrief.problem;
-          $("m_task").textContent = p.marketingBrief.task;
-          $("m_goal").textContent = p.marketingBrief.goal;
-          $("marketingHint").textContent = "ставка сыграла: ТЗ готово";
-        }
-      }catch(e){}
-    }
-
-    function wire(){
-      // Cards click -> role -> scene
-      ["cardM","cardD"].forEach(id=>{
-        $(id).addEventListener("click", ()=>{
-          const role = $(id).dataset.role;
-          setRole(role);
-          setStatus("принято");
-          startScene();
-          persist();
-        }, {passive:true});
-      });
-
-      $("btnBack").addEventListener("click", ()=>{
-        setStatus("готово");
-        switchScreen("screenHome");
-      });
-
-      $("btnGo").addEventListener("click", ()=>{
-        if (state.role === "design"){
-          setStatus("готово");
-          switchScreen("screenDesign");
-        } else if (state.role === "marketing"){
-          setStatus("готово");
-          switchScreen("screenMarketing");
-        } else {
-          switchScreen("screenHome");
-        }
-      });
-
-      $("slotPull").addEventListener("click", spinSlot);
-
-      $("cupBtn").addEventListener("click", ()=>{
-        rollDice();
-        generateMarketingBrief();
-      });
-      $("diceBtn").addEventListener("click", ()=>{
-        rollDice();
-        generateMarketingBrief();
-      });
-
-      $("btnCopyDesign").addEventListener("click", async ()=>{
-        const text = buildDesignCopyText();
-        if (!text){ showToast("Сначала прокрутите аппарат"); return; }
-        await copyToClipboard(text);
-      });
-      $("btnCopyMarketing").addEventListener("click", async ()=>{
-        const text = buildMarketingCopyText();
-        if (!text){ showToast("Сначала бросьте кости"); return; }
-        await copyToClipboard(text);
-      });
-
-      $("btnClearDesign").addEventListener("click", clearDesign);
-      $("btnClearMarketing").addEventListener("click", clearMarketing);
-
-      $("btnHomeFromDesign").addEventListener("click", ()=>{
-        setStatus("готово");
-        switchScreen("screenHome");
-      });
-      $("btnHomeFromMarketing").addEventListener("click", ()=>{
-        setStatus("готово");
-        switchScreen("screenHome");
-      });
-
-      $("designChecks").addEventListener("change", persist);
-      $("otherInput").addEventListener("input", persist);
-
-      // Dice init
-      setDiceFace($("dice1"), 6);
-      setDiceFace($("dice2"), 6);
-
-      $("otherInput").addEventListener("input", ()=>{
-        const has = $("otherInput").value.trim().length > 0;
-        if (has) $("chkOther").checked = true;
-        persist();
-      });
-    }
-
-    // Preload images to avoid "пустой кадр" при переключении
-    (function preload(){
-      const files = [
-        "home_bg.webp","card_marketing.webp","card_design.webp","home_hand.png",
-        "scene_bg.webp","scene_cardpick.webp","scene_dealer.webp",
-        "design_bg.webp","design_slot.png",
-        "marketing_bg.webp","marketing_cup.png"
-      ];
-      files.forEach(src=>{
-        const img = new Image();
-        img.src = src;
-      });
-    })();
-
-    restore();
-    wire();
-    setStatus("готово");
-
-    // Telegram BackButton behavior
-    (function tgBack(){
-      try{
-        if (!(window.Telegram && Telegram.WebApp)) return;
-        const BB = Telegram.WebApp.BackButton;
-        if (!BB) return;
-
-        function updateBackButton(){
-          const isHome = $("screenHome").classList.contains("active");
-          if (isHome) BB.hide();
-          else BB.show();
+        function goToGenerator() {
+            showPage(currentRole);
         }
 
-        BB.onClick(()=>{
-          if ($("screenDesign").classList.contains("active") || $("screenMarketing").classList.contains("active") || $("screenScene").classList.contains("active")){
-            switchScreen("screenHome");
-            setStatus("готово");
-            updateBackButton();
-          }
-        });
+        function goHome() {
+            showPage('home');
+        }
 
-        const obs = new MutationObserver(updateBackButton);
-        ["screenHome","screenScene","screenDesign","screenMarketing"].forEach(id=>{
-          obs.observe($(id), {attributes:true, attributeFilter:["class"]});
-        });
-        updateBackButton();
-      } catch(e){}
-    })();
-  </script>
+        function generateDesign() {
+            const company = randomItem(companyNames);
+            const positioning = randomItem(positionings);
+            const color = randomItem(colors);
+            const product = randomItem(products);
+            const problem = randomItem(designProblems);
+            document.getElementById('design-tz').innerHTML = `
+                <p class="tz">Название компании: ${company}</p>
+                <p class="tz">Позиционирование: ${positioning}</p>
+                <p class="tz">Основной цвет: ${color}</p>
+                <p class="tz">Продукт: ${product}</p>
+                <p class="tz">Проблема: ${problem}</p>
+            `;
+        }
+
+        function generateMarketing() {
+            const company = randomItem(companyNames);
+            const positioning = randomItem(positionings);
+            const product = randomItem(products);
+            const problem = randomItem(marketingProblems);
+            const task = randomItem(tasks);
+            const goal = randomItem(goals);
+            document.getElementById('marketing-tz').innerHTML = `
+                <p class="tz">Название компании: ${company}</p>
+                <p class="tz">Позиционирование: ${positioning}</p>
+                <p class="tz">Продукт: ${product}</p>
+                <p class="tz">Проблема: ${problem}</p>
+                <p class="tz">Задача: ${task}</p>
+                <p class="tz">Цели компании: ${goal}</p>
+            `;
+        }
+
+        function copyDesignTZ() {
+            const tzDiv = document.getElementById('design-tz');
+            if (!tzDiv.innerText) return alert('Сначала сгенерируйте ТЗ!');
+            const checkboxes = Array.from(document.querySelectorAll('#design .checkboxes input[type="checkbox"]:checked')).map(cb => cb.value);
+            const custom = document.getElementById('custom-design').value;
+            const items = [...checkboxes, custom].filter(Boolean).join(', ');
+            const [company, positioning, color, product, problem] = tzDiv.innerText.split('\n').map(line => line.split(': ')[1]);
+            const text = `Привет, я представитель компании ${company}. Мы занимаемся в основном реализацией ${product} и вот недавно столкнулись со следующей проблемой ${problem}. Нам срочно нужна твоя помощь! Директор по маркетингу очень просит сделать тебя ${items}. И просит учесть, что ${color} - это наш основной цвет, и в целом сам дизайн должен поддерживать наше позиционирование: ${positioning}. В целом мы готовы рассмотреть твои предложения по вайбу и общему настроению - мы доверяем тебе как специалисту. Ноль правок! Ждем твое решение!`;
+            navigator.clipboard.writeText(text).then(() => alert('ТЗ скопировано!'));
+        }
+
+        function copyMarketingTZ() {
+            const tzDiv = document.getElementById('marketing-tz');
+            if (!tzDiv.innerText) return alert('Сначала сгенерируйте ТЗ!');
+            const type = document.getElementById('marketing-type').value;
+            const [company, positioning, product, problem, task, goal] = tzDiv.innerText.split('\n').map(line => line.split(': ')[1]);
+            const text = `Привет, я представитель компании ${company}. Мы занимаемся в основном реализацией ${product} и вот недавно столкнулись со следующей проблемой ${problem}. Нам срочно нужна твоя помощь! Директор по маркетингу очень просит твоей помощи: помоги решить нашу задачу - ${task}. Думаю, ты и так знаешь, что решение должно коррелироваться с позиционированием ( ${positioning} ). В этом квартале наша основная цель: ${goal}. Ноль правок! Ждем твое решение! (Тип кейса: ${type})`;
+            navigator.clipboard.writeText(text).then(() => alert('ТЗ скопировано!'));
+        }
+
+        function clearTZ(role) {
+            document.getElementById(`${role}-tz`).innerHTML = '';
+            if (role === 'design') {
+                document.querySelectorAll('#design .checkboxes input').forEach(inp => inp.checked = false);
+                document.getElementById('custom-design').value = '';
+            }
+        }
+
+        function createStars(pageId) {
+            const starsDiv = document.querySelector(`#${pageId} .stars`);
+            starsDiv.innerHTML = '';
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = star.style.height = `${Math.random() * 3 + 1}px`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                starsDiv.appendChild(star);
+            }
+        }
+
+        showPage('home');
+    </script>
 </body>
 </html>
