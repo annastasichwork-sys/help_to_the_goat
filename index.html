@@ -14,30 +14,22 @@
   <style>
     :root{
       --bg:#0b0e14;
-      --panel: rgba(18, 22, 32, .82);
       --panel2: rgba(10, 12, 18, .78);
       --text:#e8edf8;
       --muted: rgba(232,237,248,.72);
       --gold:#d4af37;
-      --red:#d81b3a;
-      --greenfelt:#0b6a3a;
-      --greenfelt2:#054428;
       --stroke: rgba(255,255,255,.12);
-      --ok:#3cff7f;
       --shadow: 0 18px 45px rgba(0,0,0,.45);
       --radius: 18px;
-      --radius2: 14px;
       --btnH: 50px;
       --maxW: 520px;
-      --gap: 12px;
     }
 
     *{box-sizing:border-box;}
     html,body{height:100%; margin:0; padding:0; background: var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
     button, input{font-family: inherit;}
-    a{color: inherit;}
-
-    /* Safe area + app frame */
+    button{touch-action: manipulation;}
+    img{max-width:100%; height:auto; display:block;}
     .app{
       min-height:100%;
       padding:
@@ -58,7 +50,6 @@
       gap: 12px;
     }
 
-    /* Generic panels */
     .topbar{
       display:flex;
       align-items:center;
@@ -82,6 +73,7 @@
       white-space:nowrap;
     }
     .chip strong{color: var(--text); font-weight: 650;}
+
     .content{
       flex:1;
       min-height:0;
@@ -110,9 +102,10 @@
       display:flex;
       flex-direction:column;
       gap: 14px;
+      position:relative;
+      z-index: 2;
     }
 
-    /* Dialog */
     .dialog{
       border:1px solid var(--stroke);
       background: rgba(0,0,0,.55);
@@ -122,7 +115,7 @@
       backdrop-filter: blur(8px);
     }
     .dialogTitle{
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing:.2px;
       font-size: 14px;
       margin:0 0 6px 0;
@@ -134,12 +127,7 @@
       line-height: 1.35;
     }
 
-    /* Buttons */
-    .btnRow{
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-    }
+    .btnRow{display:flex; gap: 10px; flex-wrap:wrap;}
     .btn{
       height: var(--btnH);
       border-radius: 14px;
@@ -147,12 +135,11 @@
       background: rgba(255,255,255,.06);
       color: var(--text);
       padding: 0 14px;
-      font-weight: 750;
+      font-weight: 800;
       letter-spacing:.2px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:10px;
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
@@ -168,18 +155,7 @@
       border-color: rgba(216,27,58,.4);
       background: linear-gradient(180deg, rgba(216,27,58,.16), rgba(255,255,255,.06));
     }
-    .btn.ghost{
-      background: transparent;
-    }
-    .btn.small{
-      height: 44px;
-      border-radius: 12px;
-      font-weight: 700;
-      flex: 1 1 120px;
-      min-width: 120px;
-    }
 
-    /* Toast */
     .toast{
       position:absolute;
       left: 50%;
@@ -198,6 +174,7 @@
       overflow:hidden;
       text-overflow: ellipsis;
       backdrop-filter: blur(8px);
+      z-index: 50;
     }
     .toast.show{display:block; animation: toastIn .18s ease-out;}
     @keyframes toastIn{
@@ -205,70 +182,82 @@
       to{opacity:1; transform: translateX(-50%) translateY(0);}
     }
 
-    /* HOME: green felt scene */
-    .felt{
+    /* ---------- BACKGROUNDS (your images) ---------- */
+    .bgLayer{
+      position:absolute;
+      inset:0;
+      z-index: 0;
+      pointer-events:none;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      transform: translateZ(0);
+    }
+    .bgHome{ background-image: url("home_bg.webp"); }
+    .bgScene{ background-image: url("scene_bg.webp"); }
+    .bgDesign{ background-image: url("design_bg.webp"); }
+    .bgMarketing{ background-image: url("marketing_bg.webp"); }
+
+    /* dark overlay so text always readable */
+    .shade{
+      position:absolute;
+      inset:0;
+      z-index:1;
+      pointer-events:none;
+      background:
+        radial-gradient(1200px 600px at 50% 20%, rgba(0,0,0,.15), rgba(0,0,0,.55)),
+        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.50));
+    }
+
+    /* ---------- HOME scene layout ---------- */
+    .homeStage{
       position:relative;
       flex:1;
       min-height:0;
-      background:
-        radial-gradient(1200px 600px at 30% 15%, rgba(255,255,255,.07), transparent 60%),
-        radial-gradient(900px 500px at 80% 60%, rgba(0,0,0,.35), transparent 60%),
-        linear-gradient(180deg, var(--greenfelt), var(--greenfelt2));
       overflow:hidden;
     }
-    .felt::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background:
-        radial-gradient(circle at 30% 35%, rgba(255,255,255,.12) 0 2px, transparent 3px),
-        radial-gradient(circle at 70% 55%, rgba(255,255,255,.10) 0 2px, transparent 3px),
-        radial-gradient(circle at 55% 25%, rgba(255,255,255,.08) 0 2px, transparent 3px);
-      opacity:.35;
-      filter: blur(.3px);
-      pointer-events:none;
-    }
-
-    .tableWrap{
-      position:relative;
-      min-height: 440px;
+    .homeGrid{
+      flex:1;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
-      padding: 18px;
       gap: 14px;
+      padding: 16px;
+      min-height: 520px;
     }
     .cardsRow{
       display:flex;
       gap: 14px;
       justify-content:center;
       align-items:flex-end;
-      padding-top: 10px;
+      padding-bottom: 18px;
       flex-wrap:nowrap;
+      position:relative;
+      z-index: 3;
     }
 
-    .card{
+    /* Card as BUTTON with background image (most reliable click) */
+    .cardBtn{
       width: min(44vw, 190px);
       max-width: 190px;
       aspect-ratio: 2.5 / 3.5;
+      border: 0;
+      padding: 0;
       border-radius: 18px;
-      background:
-        linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,255,255,.88));
-      border: 1px solid rgba(0,0,0,.12);
+      background: center/cover no-repeat;
       box-shadow: 0 18px 35px rgba(0,0,0,.35);
-      position:relative;
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
+      position:relative;
       overflow:hidden;
-      transform: translateZ(0);
     }
-    .card:active{transform: translateY(1px);}
-    .card::after{
+    .cardBtn:active{transform: translateY(1px);}
+    .cardBtn::after{
       content:"";
       position:absolute;
       inset:-40%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.40), transparent);
       transform: rotate(20deg) translateX(-40%);
       animation: shine 3.2s linear infinite;
       opacity:.55;
@@ -278,179 +267,108 @@
       0%{transform: rotate(20deg) translateX(-60%);}
       100%{transform: rotate(20deg) translateX(60%);}
     }
+    #cardM{ background-image: url("card_marketing.webp"); }
+    #cardD{ background-image: url("card_design.webp"); }
 
-    .cardMark{
+    /* Hand overlay (PNG) */
+    .handImg{
       position:absolute;
-      top: 10px;
-      left: 10px;
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(0,0,0,.04);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight: 950;
-      font-size: 18px;
-    }
-    .cardMark.br{
-      top:auto; left:auto;
-      right: 10px; bottom: 10px;
-      transform: rotate(180deg);
-    }
-    .cardCenter{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      gap: 10px;
-      padding: 16px;
-      text-align:center;
-    }
-    .ace{
-      font-size: 44px;
-      font-weight: 950;
-      letter-spacing: 1px;
-      color: rgba(0,0,0,.82);
-      line-height: 1;
-    }
-    .role{
-      font-size: 13px;
-      font-weight: 850;
-      color: rgba(0,0,0,.62);
-      letter-spacing:.5px;
-    }
-
-    .gloveHand{
-      position:absolute;
-      right: -18px;
-      bottom: -8px;
-      width: 220px;
-      height: 220px;
-      opacity:.92;
+      right: -22px;
+      bottom: -10px;
+      width: min(58vw, 280px);
+      max-width: 280px;
       pointer-events:none;
       filter: drop-shadow(0 20px 35px rgba(0,0,0,.35));
-      transform: rotate(-8deg);
+      z-index: 2;
     }
 
-    /* LOADING / dealer scene */
-    .stage{
+    /* ---------- Scene 2 overlays ---------- */
+    .sceneStage{
       position:relative;
       flex:1;
       min-height:0;
-      background:
-        radial-gradient(1200px 700px at 50% 15%, rgba(216,27,58,.12), transparent 55%),
-        radial-gradient(900px 600px at 80% 70%, rgba(212,175,55,.08), transparent 60%),
-        linear-gradient(180deg, #090b11, #05060a);
       overflow:hidden;
     }
-    .stage::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(circle at 10% 25%, rgba(255,255,255,.10) 0 1px, transparent 2px),
-        radial-gradient(circle at 90% 35%, rgba(255,255,255,.08) 0 1px, transparent 2px),
-        radial-gradient(circle at 45% 70%, rgba(255,255,255,.07) 0 1px, transparent 2px),
-        radial-gradient(circle at 70% 85%, rgba(255,255,255,.05) 0 1px, transparent 2px);
-      opacity:.25;
-      filter: blur(.2px);
-      pointer-events:none;
-    }
-    .dealerWrap{
+    .sceneWrap{
+      min-height: 520px;
       display:flex;
       flex-direction:column;
       gap: 14px;
-      align-items:center;
-      justify-content:flex-end;
-      min-height: 420px;
-      padding: 18px;
     }
-    .dealerFigure{
-      width: min(70vw, 320px);
-      max-width: 320px;
-      aspect-ratio: 1 / 1;
+    .sceneImgRow{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding-top: 6px;
+    }
+    .sceneCardPick{
+      width: min(92%, 440px);
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.40);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.2);
+    }
+    .sceneCardPick img{
+      width: 100%;
+      height: auto;
+      display:block;
+    }
+
+    .dealerBox{
+      position:relative;
+      width: min(92%, 440px);
+      margin: 0 auto;
+      border-radius: 18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      box-shadow: 0 18px 40px rgba(0,0,0,.40);
       opacity: 0;
       transform: translateY(10px);
       transition: opacity .28s ease, transform .28s ease;
     }
-    .dealerFigure.show{opacity:1; transform: translateY(0);}
-    .pickCard{
-      width: min(68vw, 300px);
-      max-width: 300px;
-      opacity:.95;
-      filter: drop-shadow(0 18px 30px rgba(0,0,0,.45));
-    }
+    .dealerBox.show{opacity:1; transform: translateY(0);}
+    .dealerBox img{width:100%; height:auto; display:block;}
 
-    /* STARFIELD background for generator screens */
-    .stars{
+    /* ---------- Titles ---------- */
+    h1{margin:0; font-size: 18px; line-height: 1.15; letter-spacing:.2px;}
+    .sub{margin:0; color: var(--muted); font-size: 13px; line-height: 1.35;}
+
+    /* ---------- Machines ---------- */
+    .machineRow{display:flex; justify-content:center; align-items:center; padding: 6px 0 2px; position:relative; z-index:2;}
+
+    /* Design: slot image + live reels on top */
+    .slotStage{
+      width: min(92%, 440px);
+      position:relative;
+      border-radius: 22px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 22px 45px rgba(0,0,0,.45);
+      background: rgba(0,0,0,.25);
+    }
+    .slotBgImg{
+      width:100%;
+      height:auto;
+      display:block;
+      opacity:.98;
+    }
+    /* Overlay panel that holds reels + lever */
+    .slotOverlay{
       position:absolute;
       inset:0;
-      overflow:hidden;
-      pointer-events:none;
-      opacity:.55;
-    }
-    .stars::before,
-    .stars::after{
-      content:"";
-      position:absolute;
-      inset:-50%;
-      background:
-        radial-gradient(circle, rgba(255,255,255,.25) 0 1px, transparent 2px) 0 0/140px 140px,
-        radial-gradient(circle, rgba(255,255,255,.18) 0 1px, transparent 2px) 40px 20px/180px 180px,
-        radial-gradient(circle, rgba(255,255,255,.12) 0 1px, transparent 2px) 70px 60px/220px 220px;
-      animation: drift 18s linear infinite;
-      filter: blur(.2px);
-    }
-    .stars::after{
-      opacity:.65;
-      animation-duration: 26s;
-      animation-direction: reverse;
-    }
-    @keyframes drift{
-      0%{transform: translate3d(0,0,0);}
-      100%{transform: translate3d(90px,140px,0);}
-    }
-
-    /* Titles */
-    h1{
-      margin:0;
-      font-size: 18px;
-      line-height: 1.15;
-      letter-spacing:.2px;
-    }
-    .sub{
-      margin:0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    /* Machine / dice */
-    .machineRow{
       display:flex;
-      justify-content:center;
-      align-items:center;
-      padding: 6px 0 2px;
-    }
-    .slot{
-      width: min(92%, 420px);
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.28));
-      border: 1px solid rgba(212,175,55,.25);
-      box-shadow: 0 22px 45px rgba(0,0,0,.45);
-      position:relative;
+      flex-direction:column;
+      justify-content:flex-start;
       padding: 14px 14px 16px;
+      gap: 10px;
     }
     .slotTop{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap: 10px;
-      margin-bottom: 10px;
     }
     .slotBadge{
       display:inline-flex;
@@ -458,45 +376,17 @@
       gap:8px;
       font-size: 12px;
       color: rgba(212,175,55,.92);
-      font-weight: 850;
-      letter-spacing:.4px;
+      font-weight: 900;
+      letter-spacing:.35px;
       white-space:nowrap;
-    }
-    .slotReels{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 10px;
-      padding: 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.35);
-    }
-    .reel{
-      width: 70px;
-      height: 74px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      overflow:hidden;
-    }
-    .reelNum{
-      font-weight: 950;
-      font-size: 34px;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,.92);
-      text-shadow: 0 8px 18px rgba(0,0,0,.45);
+      text-shadow: 0 10px 18px rgba(0,0,0,.35);
     }
     .slotLever{
-      width: 88px;
+      width: 92px;
       height: 44px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
+      background: rgba(0,0,0,.25);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -505,7 +395,9 @@
       -webkit-tap-highlight-color: transparent;
       user-select:none;
       padding: 0 12px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
+    .slotLever:active{transform: translateY(1px);}
     .leverKnob{
       width: 18px;
       height: 18px;
@@ -516,18 +408,43 @@
     }
     .leverText{
       font-size: 12px;
-      font-weight: 850;
-      color: var(--muted);
+      font-weight: 900;
+      color: rgba(232,237,248,.78);
       letter-spacing:.2px;
       white-space:nowrap;
     }
-    .slotLever:active{transform: translateY(1px);}
-    .slot.win{
-      box-shadow: 0 22px 45px rgba(0,0,0,.45), 0 0 0 1px rgba(212,175,55,.22), 0 0 28px rgba(212,175,55,.14);
+    .slotReels{
+      margin-top: 6px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
     }
-    .reel.spin .reelNum{
-      animation: spin .48s ease-in-out;
+    .reel{
+      width: 70px;
+      height: 74px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
+    .reelNum{
+      font-weight: 950;
+      font-size: 34px;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 8px 18px rgba(0,0,0,.45);
+    }
+    .reel.spin .reelNum{animation: spin .48s ease-in-out;}
     @keyframes spin{
       0%{transform: translateY(0); opacity:1;}
       30%{transform: translateY(12px); opacity:.55;}
@@ -535,40 +452,46 @@
       100%{transform: translateY(0); opacity:1;}
     }
 
-    .diceWrap{
-      width: min(92%, 420px);
+    /* Marketing: image cup + live dice faces */
+    .diceStage{
+      width: min(92%, 440px);
       border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.28));
       border: 1px solid rgba(255,255,255,.14);
       box-shadow: 0 22px 45px rgba(0,0,0,.45);
+      background: rgba(0,0,0,.22);
+      overflow:hidden;
       padding: 14px;
       display:flex;
       flex-direction:column;
       gap: 12px;
     }
-    .diceRow{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 12px;
-      flex-wrap:nowrap;
-    }
-    .cupBtn, .diceBtn{
+    .row{display:flex; gap: 10px; align-items:center; flex-wrap:wrap; justify-content:space-between;}
+    .diceRow{display:flex; align-items:center; justify-content:center; gap: 12px; flex-wrap:nowrap;}
+
+    .cupBtn{
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
-    }
-    .cupBtn{
-      width: 116px;
-      height: 88px;
+      width: 118px;
+      height: 90px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
       display:flex;
       align-items:center;
       justify-content:center;
-      gap: 10px;
-      padding: 10px;
+      overflow:hidden;
+      box-shadow: 0 10px 22px rgba(0,0,0,.30);
+    }
+    .cupBtn img{width:100%; height:100%; object-fit:cover;}
+
+    .diceBtn{
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      display:flex;
+      gap: 12px;
+      align-items:center;
     }
     .dice{
       width: 74px;
@@ -596,7 +519,7 @@
       100%{transform: rotate(0) translateY(0);}
     }
 
-    /* Brief block */
+    /* ---------- Brief + checks ---------- */
     .brief{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.06);
@@ -605,6 +528,8 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
+      position:relative;
+      z-index:2;
     }
     .kv{
       display:flex;
@@ -616,7 +541,7 @@
     .k{
       color: var(--muted);
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing:.2px;
       min-width: 140px;
     }
@@ -624,18 +549,13 @@
       flex: 1 1 220px;
       font-size: 13px;
       line-height: 1.35;
-      font-weight: 700;
+      font-weight: 750;
       word-break: break-word;
       min-width: 180px;
       text-align:left;
     }
-    .emptyHint{
-      color: rgba(232,237,248,.55);
-      font-size: 12.5px;
-      line-height: 1.35;
-    }
+    .emptyHint{color: rgba(232,237,248,.55); font-size: 12.5px; line-height: 1.35;}
 
-    /* Checkboxes */
     .checks{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.04);
@@ -644,10 +564,12 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
+      position:relative;
+      z-index:2;
     }
     .checksTitle{
       font-size: 12px;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing:.25px;
       color: rgba(232,237,248,.78);
       margin:0;
@@ -667,26 +589,17 @@
       padding: 10px 10px;
       min-height: 46px;
     }
-    .check input{
-      width: 18px; height: 18px;
-      accent-color: var(--gold);
-      flex: 0 0 auto;
-    }
+    .check input{width: 18px; height: 18px; accent-color: var(--gold); flex: 0 0 auto;}
     .check span{
       font-size: 13px;
-      font-weight: 750;
+      font-weight: 800;
       color: rgba(232,237,248,.9);
       line-height: 1.2;
       overflow:hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .otherRow{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
+    .otherRow{display:flex; gap: 10px; align-items:center; flex-wrap:wrap;}
     .otherInput{
       flex: 1 1 220px;
       min-width: 190px;
@@ -701,7 +614,6 @@
     }
     .otherInput::placeholder{color: rgba(232,237,248,.42);}
 
-    /* Footer buttons always visible (but not stuck if scroll small) */
     .footerBar{
       padding: 14px 16px 16px;
       border-top: 1px solid rgba(255,255,255,.10);
@@ -709,27 +621,17 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
+      position:relative;
+      z-index: 5;
     }
 
-    /* Small helpers */
-    .row{
-      display:flex; gap: 10px; align-items:center; flex-wrap:wrap;
-    }
-    .sep{
-      height: 1px;
-      background: rgba(255,255,255,.10);
-      width:100%;
-    }
-    .muted{color: var(--muted);}
-
-    /* Make sure tiny phones still fit */
     @media (max-width: 360px){
       .btn{min-width: 120px;}
       .reel{width: 64px; height: 70px;}
-      .card{width: 44vw;}
       .checkGrid{grid-template-columns: 1fr;}
       .k{min-width: 120px;}
       .v{min-width: 160px;}
+      .handImg{width:min(62vw, 260px);}
     }
   </style>
 </head>
@@ -750,101 +652,48 @@
 
         <!-- SCREEN 1: HOME -->
         <section class="screen active" id="screenHome" aria-label="Домашняя">
-          <div class="felt">
-            <div class="tableWrap">
+          <div class="homeStage">
+            <div class="bgLayer bgHome"></div>
+            <div class="shade"></div>
+
+            <div class="homeGrid">
               <div class="dialog">
                 <p class="dialogTitle">Выберите карту</p>
-                <p class="dialogText">Нажмите на любую. Дальше будет небольшая сцена, а потом генератор.</p>
+                <p class="dialogText">Нажмите на любую. Дальше будет сцена, а потом генератор.</p>
               </div>
 
               <div class="cardsRow" role="group" aria-label="Выбор карты">
-                <div class="card" id="cardM" data-role="marketing" aria-label="Карта маркетолога" title="Маркетолог">
-                  <div class="cardMark">М</div>
-                  <div class="cardMark br">М</div>
-                  <div class="cardCenter">
-                    <div class="ace">A</div>
-                    <div class="role">МАРКЕТОЛОГ</div>
-                  </div>
-                </div>
-
-                <div class="card" id="cardD" data-role="design" aria-label="Карта дизайнера" title="Дизайнер">
-                  <div class="cardMark">Д</div>
-                  <div class="cardMark br">Д</div>
-                  <div class="cardCenter">
-                    <div class="ace">A</div>
-                    <div class="role">ДИЗАЙНЕР</div>
-                  </div>
-                </div>
+                <button class="cardBtn" id="cardM" data-role="marketing" aria-label="Карта маркетолога"></button>
+                <button class="cardBtn" id="cardD" data-role="design" aria-label="Карта дизайнера"></button>
               </div>
-
-              <!-- White glove hand placing cards -->
-              <svg class="gloveHand" viewBox="0 0 200 200" aria-hidden="true">
-                <defs>
-                  <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="rgba(255,255,255,.96)"/>
-                    <stop offset="1" stop-color="rgba(255,255,255,.68)"/>
-                  </linearGradient>
-                </defs>
-                <path d="M55 120c10-22 20-36 32-44 8-5 14-4 18 2 4 6 3 14-2 21l-7 10 14-12c9-8 17-10 22-5 5 5 3 13-6 22l-11 11 16-9c11-6 19-6 23-1 4 5 1 12-10 20l-20 14c-10 7-21 11-34 12-21 2-33-6-35-23z"
-                      fill="url(#g1)" stroke="rgba(0,0,0,.12)" stroke-width="1.2"/>
-                <path d="M40 140c10 12 26 20 45 19 18-1 35-7 49-17"
-                      fill="none" stroke="rgba(0,0,0,.10)" stroke-width="2" stroke-linecap="round"/>
-              </svg>
             </div>
+
+            <img class="handImg" src="home_hand.png" alt="" loading="eager" />
           </div>
         </section>
 
-        <!-- SCREEN 2: LOADING / SCENE -->
+        <!-- SCREEN 2: SCENE -->
         <section class="screen" id="screenScene" aria-label="Сцена">
-          <div class="stage">
+          <div class="sceneStage">
+            <div class="bgLayer bgScene"></div>
+            <div class="shade"></div>
+
             <div class="scroll" style="padding-bottom: 10px;">
-              <div class="dialog" id="sceneDialog1">
-                <p class="dialogTitle">Вы берете карту</p>
-                <p class="dialogText">Секунда. Дайте крупье подготовить ставку.</p>
-              </div>
+              <div class="sceneWrap">
+                <div class="dialog" id="sceneDialog1">
+                  <p class="dialogTitle">Вы берете карту</p>
+                  <p class="dialogText">Секунда. Дайте крупье подготовить удачу.</p>
+                </div>
 
-              <div class="machineRow" aria-hidden="true">
-                <svg class="pickCard" viewBox="0 0 340 220">
-                  <defs>
-                    <linearGradient id="pc1" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0" stop-color="rgba(255,255,255,.96)"/>
-                      <stop offset="1" stop-color="rgba(255,255,255,.78)"/>
-                    </linearGradient>
-                    <linearGradient id="pc2" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stop-color="rgba(255,255,255,.55)"/>
-                      <stop offset="1" stop-color="rgba(255,255,255,.0)"/>
-                    </linearGradient>
-                  </defs>
-                  <rect x="140" y="40" width="120" height="170" rx="18" fill="url(#pc1)" stroke="rgba(0,0,0,.16)"/>
-                  <rect x="150" y="54" width="100" height="22" rx="10" fill="rgba(0,0,0,.06)"/>
-                  <text x="200" y="71" text-anchor="middle" font-size="12" font-weight="900" fill="rgba(0,0,0,.55)">ВАША КАРТА</text>
+                <div class="sceneImgRow">
+                  <div class="sceneCardPick">
+                    <img src="scene_cardpick.webp" alt="" loading="eager" />
+                  </div>
+                </div>
 
-                  <path d="M60 160c15-30 33-48 54-55 16-5 22 3 19 16-2 7-8 15-15 23l25-15c12-7 22-6 25 2 3 8-5 18-22 28l-22 13c-19 11-42 15-64 12"
-                        fill="rgba(255,255,255,.86)" stroke="rgba(0,0,0,.12)" stroke-width="1.2"/>
-                  <path d="M70 172c12 10 30 13 54 8" fill="none" stroke="rgba(0,0,0,.10)" stroke-width="2" stroke-linecap="round"/>
-                  <rect x="140" y="40" width="120" height="170" rx="18" fill="url(#pc2)"/>
-                </svg>
-              </div>
-
-              <div class="dealerWrap">
-                <svg class="dealerFigure" id="dealerFigure" viewBox="0 0 360 360" aria-hidden="true">
-                  <defs>
-                    <radialGradient id="dGlow" cx="45%" cy="25%" r="70%">
-                      <stop offset="0" stop-color="rgba(216,27,58,.25)"/>
-                      <stop offset="1" stop-color="rgba(216,27,58,0)"/>
-                    </radialGradient>
-                    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stop-color="rgba(216,27,58,.88)"/>
-                      <stop offset="1" stop-color="rgba(120,10,24,.88)"/>
-                    </linearGradient>
-                  </defs>
-                  <circle cx="180" cy="170" r="150" fill="url(#dGlow)"/>
-                  <circle cx="180" cy="120" r="34" fill="rgba(255,255,255,.18)"/>
-                  <path d="M112 300c18-86 47-126 68-126s50 40 68 126c-48 20-92 20-136 0z" fill="url(#dress)" stroke="rgba(255,255,255,.12)"/>
-                  <path d="M130 180c22 20 78 20 100 0" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="6" stroke-linecap="round"/>
-                  <path d="M98 246c16-20 34-28 54-26" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="6" stroke-linecap="round"/>
-                  <path d="M262 246c-16-20-34-28-54-26" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="6" stroke-linecap="round"/>
-                </svg>
+                <div class="dealerBox" id="dealerBox" aria-hidden="true">
+                  <img src="scene_dealer.webp" alt="" loading="eager" />
+                </div>
 
                 <div class="dialog" id="sceneDialog2" style="display:none;">
                   <p class="dialogTitle">У меня есть пара интересных кейсов для тебя</p>
@@ -861,7 +710,9 @@
 
         <!-- SCREEN 3A: DESIGN -->
         <section class="screen" id="screenDesign" aria-label="Дизайн">
-          <div class="stars"></div>
+          <div class="bgLayer bgDesign"></div>
+          <div class="shade"></div>
+
           <div class="scroll">
             <div>
               <h1>Генератор кейсов для дизайнеров</h1>
@@ -869,19 +720,22 @@
             </div>
 
             <div class="machineRow">
-              <div class="slot" id="slotBox">
-                <div class="slotTop">
-                  <div class="slotBadge">♠ джекпот по умолчанию</div>
-                  <div class="slotLever" id="slotPull" role="button" aria-label="Дернуть ручку">
-                    <div class="leverKnob"></div>
-                    <div class="leverText">Дернуть</div>
+              <div class="slotStage" id="slotBox">
+                <img class="slotBgImg" src="design_slot.png" alt="" loading="eager" />
+                <div class="slotOverlay">
+                  <div class="slotTop">
+                    <div class="slotBadge">♠ джекпот по умолчанию</div>
+                    <div class="slotLever" id="slotPull" role="button" aria-label="Дернуть ручку">
+                      <div class="leverKnob"></div>
+                      <div class="leverText">Дернуть</div>
+                    </div>
                   </div>
-                </div>
 
-                <div class="slotReels" aria-hidden="true">
-                  <div class="reel"><div class="reelNum" id="reel1">7</div></div>
-                  <div class="reel"><div class="reelNum" id="reel2">7</div></div>
-                  <div class="reel"><div class="reelNum" id="reel3">7</div></div>
+                  <div class="slotReels" aria-hidden="true">
+                    <div class="reel"><div class="reelNum" id="reel1">7</div></div>
+                    <div class="reel"><div class="reelNum" id="reel2">7</div></div>
+                    <div class="reel"><div class="reelNum" id="reel3">7</div></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -911,7 +765,7 @@
                 </label>
                 <input class="otherInput" id="otherInput" placeholder="Например: лендинг, гайдлайн для соцсетей, иллюстрации..." />
               </div>
-              <p class="sub" style="margin:0;">Подсказка: если выбрано несколько пунктов, я красиво перечислю их в тексте.</p>
+              <p class="sub" style="margin:0;">Если выбрано несколько пунктов, я перечислю их в тексте аккуратно.</p>
             </div>
           </div>
 
@@ -927,7 +781,9 @@
 
         <!-- SCREEN 3B: MARKETING -->
         <section class="screen" id="screenMarketing" aria-label="Маркетинг">
-          <div class="stars"></div>
+          <div class="bgLayer bgMarketing"></div>
+          <div class="shade"></div>
+
           <div class="scroll">
             <div>
               <h1>Генератор кейсов для маркетологов</h1>
@@ -935,28 +791,18 @@
             </div>
 
             <div class="machineRow">
-              <div class="diceWrap">
-                <div class="row" style="justify-content:space-between;">
+              <div class="diceStage">
+                <div class="row">
                   <div class="chip"><strong>кости</strong> + стакан</div>
                   <div class="chip" id="diceLabel">жмите на кости или стакан</div>
                 </div>
 
                 <div class="diceRow">
                   <div class="cupBtn" id="cupBtn" role="button" aria-label="Накрыть кости стаканом">
-                    <svg width="88" height="64" viewBox="0 0 88 64" aria-hidden="true">
-                      <defs>
-                        <linearGradient id="cupG" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0" stop-color="rgba(185,190,205,.32)"/>
-                          <stop offset="1" stop-color="rgba(120,125,140,.12)"/>
-                        </linearGradient>
-                      </defs>
-                      <path d="M16 10h56l-10 44H26L16 10z" fill="url(#cupG)" stroke="rgba(255,255,255,.20)" stroke-width="1.2" />
-                      <path d="M22 14h44" stroke="rgba(255,255,255,.22)" stroke-width="3" stroke-linecap="round" />
-                      <path d="M30 54h28" stroke="rgba(0,0,0,.25)" stroke-width="4" stroke-linecap="round" />
-                    </svg>
+                    <img src="marketing_cup.png" alt="" loading="eager" />
                   </div>
 
-                  <div class="diceBtn" id="diceBtn" role="button" aria-label="Бросить кости" style="display:flex; gap:12px;">
+                  <div class="diceBtn" id="diceBtn" role="button" aria-label="Бросить кости">
                     <div class="dice" id="dice1" aria-label="Кость 1"></div>
                     <div class="dice" id="dice2" aria-label="Кость 2"></div>
                   </div>
@@ -985,6 +831,7 @@
             <div class="chip" id="marketingHint">сначала бросьте кости</div>
           </div>
         </section>
+
       </div>
     </div>
   </div>
@@ -996,14 +843,12 @@
         if (window.Telegram && Telegram.WebApp){
           Telegram.WebApp.ready();
           Telegram.WebApp.expand();
-          // Optional: set header/background colors if supported
           try { Telegram.WebApp.setHeaderColor?.("#0b0e14"); } catch(e){}
           try { Telegram.WebApp.setBackgroundColor?.("#0b0e14"); } catch(e){}
         }
       } catch (e) {}
     })();
 
-    // Helpers
     const $ = (id) => document.getElementById(id);
     const toast = $("toast");
     function showToast(msg){
@@ -1012,23 +857,19 @@
       clearTimeout(showToast._t);
       showToast._t = setTimeout(()=> toast.classList.remove("show"), 1200);
     }
-
     function setStatus(text){ $("statusChip").textContent = text; }
 
-    function pick(arr){
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
+    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
     function switchScreen(screenId){
       const screens = ["screenHome","screenScene","screenDesign","screenMarketing"];
       screens.forEach(id => $(id).classList.toggle("active", id === screenId));
-      // ensure scroll top on screen change
       const active = $(screenId);
       const sc = active.querySelector(".scroll");
       if (sc) sc.scrollTop = 0;
     }
 
-    // Data (50 each)
+    // Data
     const companyNames = [
       "Velvet Pine","Neon Harbor","Atlas & Co","Golden Finch","Paper Tiger Studio","North Mint","LumaCraft","Brick & Bloom","Silver Anchor","SoftGrid",
       "Rocket Apricot","Urban Fern","Moonlit Market","Coral Junction","Quiet Storm Lab","Honey Circuit","Stonewave","Frost & Fire","Citrus Union","Sunline Works",
@@ -1079,7 +920,6 @@
       "Пастельный беж #E7D7C1","Пыльный розовый #D8A7B1","Теплый серый #A8A29E","Черный лак #050608","Красный неон #FF0033"
     ];
 
-    // Separate problems
     const problemsMarketing = [
       "Лиды идут, но почти никто не покупает.","Стоимость привлечения клиента растет каждый месяц.","Реклама работает нестабильно, нет предсказуемости.","Мы не понимаем, кто наша самая прибыльная аудитория.",
       "Нет четкого УТП, звучим как все.","Трафик есть, но конверсия на сайте слабая.","Брошенных корзин слишком много.","Люди регистрируются, но не активируются.",
@@ -1144,19 +984,14 @@
       "Увеличить конверсию онбординга.","Выйти на предсказуемый рост месяц к месяцу."
     ];
 
-    // App state
     const state = {
-      role: null,         // "design" | "marketing"
+      role: null,
       designBrief: null,
       marketingBrief: null,
-      dice: [6,6],
-      hasDesign: false,
-      hasMarketing: false
+      dice: [6,6]
     };
 
-    // UI elements
     const roleChip = $("roleChip");
-
     function setRole(role){
       state.role = role;
       roleChip.innerHTML = role === "design"
@@ -1166,27 +1001,22 @@
           : 'роль: <strong>не выбрана</strong>';
     }
 
-    // Scene flow
     function startScene(){
       setStatus("сцена...");
       switchScreen("screenScene");
       $("sceneDialog2").style.display = "none";
-      $("dealerFigure").classList.remove("show");
+      $("dealerBox").classList.remove("show");
 
-      // small staged reveal
       clearTimeout(startScene._t1);
       clearTimeout(startScene._t2);
-      startScene._t1 = setTimeout(()=>{
-        $("dealerFigure").classList.add("show");
-      }, 650);
 
+      startScene._t1 = setTimeout(()=> $("dealerBox").classList.add("show"), 650);
       startScene._t2 = setTimeout(()=>{
         $("sceneDialog2").style.display = "block";
         setStatus("ожидаю");
       }, 950);
     }
 
-    // Dice rendering
     function setDiceFace(el, value){
       el.innerHTML = "";
       const pos = {
@@ -1195,13 +1025,9 @@
         bl:[18,56], br:[56,56],
         c:[37,37]
       };
-
       const layout = {
-        1:["c"],
-        2:["tl","br"],
-        3:["tl","c","br"],
-        4:["tl","tr","bl","br"],
-        5:["tl","tr","c","bl","br"],
+        1:["c"], 2:["tl","br"], 3:["tl","c","br"],
+        4:["tl","tr","bl","br"], 5:["tl","tr","c","bl","br"],
         6:["tl","ml","bl","tr","mr","br"]
       }[value];
 
@@ -1225,7 +1051,6 @@
       const dice2 = $("dice2");
       dice1.classList.remove("spin");
       dice2.classList.remove("spin");
-      // trigger reflow to restart animation
       void dice1.offsetWidth;
 
       dice1.classList.add("spin");
@@ -1237,7 +1062,6 @@
       $("diceLabel").textContent = `выпало: ${d1} + ${d2}`;
     }
 
-    // Generate briefs
     function generateDesignBrief(){
       const brief = {
         company: pick(companyNames),
@@ -1247,7 +1071,6 @@
         problem: pick(problemsDesign)
       };
       state.designBrief = brief;
-      state.hasDesign = true;
 
       $("d_company").textContent = brief.company;
       $("d_pos").textContent = brief.pos;
@@ -1270,7 +1093,6 @@
         goal: pick(goals)
       };
       state.marketingBrief = brief;
-      state.hasMarketing = true;
 
       $("m_company").textContent = brief.company;
       $("m_pos").textContent = brief.pos;
@@ -1284,7 +1106,6 @@
       persist();
     }
 
-    // Slot animation + always win
     function spinSlot(){
       const reels = [
         $("reel1").parentElement,
@@ -1292,12 +1113,10 @@
         $("reel3").parentElement
       ];
       reels.forEach(r=> r.classList.add("spin"));
-      $("slotBox").classList.add("win");
       setStatus("крутим...");
 
       setTimeout(()=>{
         reels.forEach(r=> r.classList.remove("spin"));
-        // Always 777 but still new brief
         $("reel1").textContent = "7";
         $("reel2").textContent = "7";
         $("reel3").textContent = "7";
@@ -1305,7 +1124,6 @@
       }, 520);
     }
 
-    // Checkboxes selection -> nice string
     function getDesignDeliverables(){
       const checks = [...$("designChecks").querySelectorAll('input[type="checkbox"]')];
       const selected = [];
@@ -1324,14 +1142,12 @@
         selected.push("что-то свое");
       }
 
-      // return a human list
       if (!selected.length) return "какой-то дизайн-материал";
       if (selected.length === 1) return selected[0];
       if (selected.length === 2) return selected[0] + " и " + selected[1];
       return selected.slice(0, -1).join(", ") + " и " + selected[selected.length - 1];
     }
 
-    // Copy text builders (with your agreed wording fixes)
     function buildDesignCopyText(){
       if (!state.designBrief) return null;
       const b = state.designBrief;
@@ -1367,7 +1183,6 @@
         showToast("Скопировано в буфер");
         return true;
       }catch(e){
-        // fallback
         try{
           const ta = document.createElement("textarea");
           ta.value = text;
@@ -1387,10 +1202,8 @@
       }
     }
 
-    // Clear
     function clearDesign(){
       state.designBrief = null;
-      state.hasDesign = false;
       $("d_company").innerHTML = '<span class="emptyHint">Нажмите на ручку аппарата.</span>';
       $("d_pos").textContent = "-";
       $("d_color").textContent = "-";
@@ -1398,7 +1211,6 @@
       $("d_problem").textContent = "-";
       $("designHint").textContent = "сначала прокрутите аппарат";
 
-      // uncheck
       [...$("designChecks").querySelectorAll('input[type="checkbox"]')].forEach(ch=> ch.checked = false);
       $("otherInput").value = "";
       setStatus("готово");
@@ -1408,7 +1220,6 @@
 
     function clearMarketing(){
       state.marketingBrief = null;
-      state.hasMarketing = false;
       $("m_company").innerHTML = '<span class="emptyHint">Нажмите на кости или стакан.</span>';
       $("m_pos").textContent = "-";
       $("m_product").textContent = "-";
@@ -1418,7 +1229,6 @@
       $("marketingHint").textContent = "сначала бросьте кости";
       $("diceLabel").textContent = "жмите на кости или стакан";
 
-      // reset dice to 6/6
       state.dice = [6,6];
       setDiceFace($("dice1"), 6);
       setDiceFace($("dice2"), 6);
@@ -1428,8 +1238,7 @@
       showToast("Стерто");
     }
 
-    // Persistence
-    const LS_KEY = "casino_cases_v1";
+    const LS_KEY = "casino_cases_v2_imgs_root";
     function persist(){
       try{
         const payload = {
@@ -1443,6 +1252,7 @@
         localStorage.setItem(LS_KEY, JSON.stringify(payload));
       } catch(e){}
     }
+
     function restore(){
       try{
         const raw = localStorage.getItem(LS_KEY);
@@ -1451,7 +1261,6 @@
 
         if (p.role) setRole(p.role);
 
-        // restore checkboxes
         if (p.checks && Array.isArray(p.checks)){
           const map = new Map(p.checks.map(x => [x.id ? ("#"+x.id) : ("[value='"+x.v+"']"), x.checked]));
           [...$("designChecks").querySelectorAll('input[type="checkbox"]')].forEach(ch=>{
@@ -1472,7 +1281,6 @@
 
         if (p.designBrief){
           state.designBrief = p.designBrief;
-          state.hasDesign = true;
           $("d_company").textContent = p.designBrief.company;
           $("d_pos").textContent = p.designBrief.pos;
           $("d_color").textContent = p.designBrief.color;
@@ -1483,7 +1291,6 @@
 
         if (p.marketingBrief){
           state.marketingBrief = p.marketingBrief;
-          state.hasMarketing = true;
           $("m_company").textContent = p.marketingBrief.company;
           $("m_pos").textContent = p.marketingBrief.pos;
           $("m_product").textContent = p.marketingBrief.product;
@@ -1495,9 +1302,8 @@
       }catch(e){}
     }
 
-    // Wiring events
     function wire(){
-      // Cards
+      // Cards click -> role -> scene
       ["cardM","cardD"].forEach(id=>{
         $(id).addEventListener("click", ()=>{
           const role = $(id).dataset.role;
@@ -1508,7 +1314,6 @@
         }, {passive:true});
       });
 
-      // Scene buttons
       $("btnBack").addEventListener("click", ()=>{
         setStatus("готово");
         switchScreen("screenHome");
@@ -1526,12 +1331,8 @@
         }
       });
 
-      // Slot pull
-      $("slotPull").addEventListener("click", ()=>{
-        spinSlot();
-      });
+      $("slotPull").addEventListener("click", spinSlot);
 
-      // Dice roll (cup or dice)
       $("cupBtn").addEventListener("click", ()=>{
         rollDice();
         generateMarketingBrief();
@@ -1541,7 +1342,6 @@
         generateMarketingBrief();
       });
 
-      // Copy
       $("btnCopyDesign").addEventListener("click", async ()=>{
         const text = buildDesignCopyText();
         if (!text){ showToast("Сначала прокрутите аппарат"); return; }
@@ -1553,11 +1353,9 @@
         await copyToClipboard(text);
       });
 
-      // Clear
       $("btnClearDesign").addEventListener("click", clearDesign);
       $("btnClearMarketing").addEventListener("click", clearMarketing);
 
-      // Home buttons
       $("btnHomeFromDesign").addEventListener("click", ()=>{
         setStatus("готово");
         switchScreen("screenHome");
@@ -1567,15 +1365,13 @@
         switchScreen("screenHome");
       });
 
-      // Persist on checks changes
       $("designChecks").addEventListener("change", persist);
       $("otherInput").addEventListener("input", persist);
 
-      // initial dice faces
+      // Dice init
       setDiceFace($("dice1"), 6);
       setDiceFace($("dice2"), 6);
 
-      // Make "other" checkbox auto-check when user types, but not annoyingly
       $("otherInput").addEventListener("input", ()=>{
         const has = $("otherInput").value.trim().length > 0;
         if (has) $("chkOther").checked = true;
@@ -1583,12 +1379,25 @@
       });
     }
 
-    // Start
+    // Preload images to avoid "пустой кадр" при переключении
+    (function preload(){
+      const files = [
+        "home_bg.webp","card_marketing.webp","card_design.webp","home_hand.png",
+        "scene_bg.webp","scene_cardpick.webp","scene_dealer.webp",
+        "design_bg.webp","design_slot.png",
+        "marketing_bg.webp","marketing_cup.png"
+      ];
+      files.forEach(src=>{
+        const img = new Image();
+        img.src = src;
+      });
+    })();
+
     restore();
     wire();
     setStatus("готово");
 
-    // Optional: Telegram BackButton behavior
+    // Telegram BackButton behavior
     (function tgBack(){
       try{
         if (!(window.Telegram && Telegram.WebApp)) return;
@@ -1597,11 +1406,8 @@
 
         function updateBackButton(){
           const isHome = $("screenHome").classList.contains("active");
-          if (isHome) {
-            BB.hide();
-          } else {
-            BB.show();
-          }
+          if (isHome) BB.hide();
+          else BB.show();
         }
 
         BB.onClick(()=>{
@@ -1612,7 +1418,6 @@
           }
         });
 
-        // observe screen changes
         const obs = new MutationObserver(updateBackButton);
         ["screenHome","screenScene","screenDesign","screenMarketing"].forEach(id=>{
           obs.observe($(id), {attributes:true, attributeFilter:["class"]});
