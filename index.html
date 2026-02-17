@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Генератор кейсов: Маркетолог или Дизайнер?</title>
+    <title>Генератор кейсов</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
             color: white;
             background: #000;
             height: 100dvh;
@@ -19,15 +19,28 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             background-size: cover;
             background-position: center;
-            padding: 10px 14px;
-            gap: 1.2vh;
+            padding: 10px 14px 70px;
         }
 
-        h1 { font-size: clamp(1.7rem, 6.5vw, 2.8rem); margin: 0.3em 0; text-shadow: 0 2px 8px #000; text-align: center; }
-        p { font-size: clamp(0.95rem, 3.8vw, 1.2rem); max-width: 92%; text-align: center; margin: 0.6em 0 1em; line-height: 1.4; }
+        h1 {
+            font-size: clamp(1.6rem, 6vw, 2.4rem);
+            margin: 8px 0 4px;
+            text-shadow: 0 2px 6px #000;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        p {
+            font-size: clamp(0.95rem, 3.8vw, 1.15rem);
+            line-height: 1.35;
+            max-width: 94%;
+            text-align: center;
+            margin: 6px 0 12px;
+            text-shadow: 0 1px 4px black;
+        }
 
         .btn {
             padding: 12px 28px;
@@ -40,120 +53,119 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             min-width: 140px;
+            transition: all 0.15s;
         }
+
         .btn:active { transform: scale(0.97); }
 
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 88%;
+            max-width: 360px;
+            margin-top: auto;
+            padding-bottom: 10px;
+        }
+
         .stars { position: absolute; inset: 0; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.4; animation: twinkle 5s infinite; }
-        @keyframes twinkle { 50% { opacity: 0.08; } }
+        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.35; animation: twinkle 6s infinite; }
+        @keyframes twinkle { 50% { opacity: 0.07; } }
 
         /* ─── Loading ─── */
         #loading {
             background-image: url('scene_bg.webp');
-            justify-content: center;
-        }
-        #loading .scene-container {
-            position: relative;
-            width: 100%;
-            height: 42vh;
-            max-height: 360px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #loading .cardpick-wrapper {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeOutUp 1s ease-in-out 1.5s forwards;
-        }
-        @keyframes fadeOutUp { to { opacity:0; transform: translateY(-35%); } }
-        #loading .dealer {
-            width: clamp(200px, 50vw, 320px);
-            max-height: 55vh;
-            object-fit: contain;
-            opacity: 0;
-            animation: fadeInDown 1.2s ease-out 1.7s forwards;
-        }
-        @keyframes fadeInDown { from { opacity:0; transform: translateY(25%); } to { opacity:1; transform: translateY(0); } }
-        #loading .dialog {
-            margin-top: 16px;
-            text-align: center;
-            opacity: 0;
-            animation: appear 0.7s ease-out 3s forwards;
+            justify-content: flex-start;
+            padding-top: 6vh;
         }
 
+        #loading .scene {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-height: 48vh;
+        }
+
+        #loading img {
+            max-width: 80%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #loading .dealer {
+            opacity: 0;
+            animation: fadeIn 1.4s ease-out 1.8s forwards;
+        }
+
+        @keyframes fadeIn { from { opacity:0; transform: translateY(20%); } to { opacity:1; transform: translateY(0); } }
+
         /* ─── Home ─── */
-        #home { background-image: url('home_bg.webp'); }
-        #home .hand { width: clamp(140px, 35vw, 220px); margin-bottom: 12px; }
-        #home .cards { display: flex; gap: 24px; margin: 12px 0; }
-        #home .card { width: clamp(90px, 28vw, 140px); cursor: pointer; }
+        #home {
+            background-image: url('home_bg.webp');
+            justify-content: center;
+            gap: 2vh;
+        }
+
+        #home .hand { width: clamp(140px, 35vw, 200px); margin-bottom: 12px; }
+        #home .cards { display: flex; gap: 20px; margin: 12px 0; }
+        #home .card { width: clamp(90px, 28vw, 130px); }
 
         /* ─── Generators ─── */
         #design, #marketing {
             justify-content: flex-start;
             padding-top: 6vh;
+            gap: 1vh;
         }
+
         #design { background-image: url('design_bg.webp'); }
         #marketing { background-image: url('marketing_bg.webp'); }
 
-        .slot, .cup-container {
-            width: clamp(160px, 42vw, 240px);
-            height: clamp(200px, 55vw, 300px);
-            position: relative;
-            margin: 16px 0 24px;
-            cursor: pointer;
-        }
-        .slot img { width: 100%; height: 100%; object-fit: contain; }
-
-        .cup-container .cup {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            z-index: 2;
-            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .cup-container .dice {
-            position: absolute;
-            width: 60%;
-            top: 38%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-            transition: all 0.6s ease;
-        }
-
-        .cup-container.animate .cup {
-            transform: translateY(-15%) scale(1.12);
-        }
-
-        .cup-container.animate .dice {
-            transform: translate(-50%, -65%) scale(1.08);
+        .generator-img {
+            width: clamp(160px, 40vw, 220px);
+            margin: 12px 0 16px;
         }
 
         #design-tz, #marketing-tz {
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(8px);
-            border-radius: 12px;
-            padding: 14px;
-            margin: 12px 0;
+            background: rgba(0,0,0,0.6);
+            border-radius: 10px;
+            padding: 12px;
             width: 92%;
-            max-width: 500px;
+            max-width: 480px;
+            font-size: clamp(0.9rem, 3.4vw, 1.05rem);
+            line-height: 1.4;
         }
-        .tz { font-size: clamp(0.9rem, 3.4vw, 1.05rem); margin: 0.4em 0; text-align: left; }
-        .checkboxes { display: flex; flex-wrap: wrap; gap: 10px 16px; justify-content: center; margin: 14px 0; font-size: clamp(0.9rem, 3.6vw, 1.05rem); }
-        .actions { display: flex; flex-wrap: wrap; gap: 12px 20px; justify-content: center; margin-top: 16px; }
+
+        .checkboxes, .actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 16px;
+            margin: 12px 0;
+        }
+
+        .checkboxes label {
+            background: rgba(255,255,255,0.08);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: clamp(0.9rem, 3.6vw, 1.05rem);
+        }
+
+        select {
+            padding: 10px 16px;
+            font-size: 1.05rem;
+            background: rgba(30,30,30,0.8);
+            color: white;
+            border: 1px solid #555;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
 
         @media (min-width: 768px) {
-            .page { padding: 30px 50px; gap: 2vh; }
             h1 { font-size: 2.8rem; }
-            .btn { padding: 16px 44px; font-size: 1.25rem; }
-            .slot, .cup-container { width: 260px; height: 340px; }
+            .btn { padding: 14px 40px; font-size: 1.2rem; }
+            .generator-img { width: 240px; }
         }
     </style>
 </head>
@@ -171,10 +183,7 @@
 
     <!-- Loading -->
     <div id="loading" class="page">
-        <div class="scene-container">
-            <div class="cardpick-wrapper">
-                <img src="scene_cardpick.webp" class="cardpick" alt="">
-            </div>
+        <div class="scene">
             <img src="scene_dealer.webp" class="dealer" alt="">
         </div>
         <div class="dialog">
@@ -191,7 +200,7 @@
         <div class="stars"></div>
         <h1>Генератор кейсов для дизайнеров</h1>
         <p>Сгенерируйте идею для кейса: вы можете использовать ее для лого, презентации, мерча или даже брендбука</p>
-        <img src="design_slot.png" class="slot" onclick="generateDesign()" alt="">
+        <img src="design_slot.png" class="generator-img" onclick="generateDesign()" alt="">
         <div id="design-tz"></div>
         <div class="checkboxes">
             <label><input type="checkbox" value="логотип"> Логотип</label>
@@ -213,10 +222,7 @@
         <div class="stars"></div>
         <h1>Генератор кейсов для маркетологов</h1>
         <p>Сгенерируйте идею для кейса: вы можете использовать ее для презентации, исследования, брендбука, сравнения или любого другого кейса</p>
-        <div class="cup-container" onclick="generateMarketingWithAnim()">
-            <img src="marketing_cup.png" class="cup" alt="Чаша">
-            <img src="marketing_dice.png" class="dice" alt="Кубики">
-        </div>
+        <img src="marketing_dice.png" class="generator-img" onclick="generateMarketing()" alt="Кубики">
         <div id="marketing-tz"></div>
         <select id="marketing-type">
             <option value="презентация">Презентация</option>
@@ -233,16 +239,28 @@
     </div>
 
     <script>
-        // Массивы (полные, как раньше)
+        // Массивы (полные — вставлены все 50)
         const companyNames = ["EcoBloom Solutions","TechNova Innovations","FreshHarvest Foods","UrbanMobility Rides","StyleForge Apparel","HealthVibe Wellness","CodeCraft Software","GreenLeaf Energy","LuxeHome Interiors","FitTrack Gear","ByteBridge Networks","PureSip Beverages","AdventureQuest Travel","SmartNest Homes","GlowBeauty Cosmetics","PowerUp Fitness","DataSphere Analytics","CraftBrew Masters","EcoDrive Autos","MindfulMed Health","VirtualWorld VR","PetPals Supplies","FinSecure Banking","ArtisanalBake Goods","SolarSpark Energy","EduQuest Learning","FashionFusion Clothes","AgriTech Farms","SoundWave Audio","BioVital Supplements","TravelTrek Tours","HomeHarmony Decor","SpeedNet Internet","WellnessWave Spa","InnovateHub Tech","GourmetGrove Foods","AutoElite Cars","BrainBoost Education","StyleSphere Fashion","EcoPure Water","GameForge Studios","HealthHub Clinics","CloudCore Computing","BrewBuddy Coffee","RideShare Mobility","BeautyBloom Skincare","EnergyEdge Power","SoftServe IT","FarmFresh Produce","LuxTravel Experiences"];
 
         const positionings = ["Экологически чистые решения для устойчивого будущего","Инновационные технологии для цифровой трансформации","Свежие органические продукты прямо с фермы","Удобный и доступный городской транспорт","Современная мода для уверенных в себе людей","Holistic подход к здоровью и благополучию","Надежное ПО для бизнеса любого масштаба","Возобновляемая энергия для зеленого мира","Элегантный дизайн интерьеров для комфорта","Спортивное оборудование для активного образа жизни","Безопасные сети для бесперебойной связи","Натуральные напитки для ежедневного удовольствия","Приключенческие туры для искателей адреналина","Умные дома для современной жизни","Натуральная косметика для сияющей кожи","Фитнес-программы для максимальной эффективности","Аналитика данных для умных решений","Ремесленное пиво для ценителей вкуса","Экологичные автомобили для сознательных водителей","Ментальное здоровье через mindfulness практики","Иммерсивный VR для развлечений и образования","Качественные товары для любимых питомцев","Безопасные финансовые услуги для всех","Ручная выпечка с традиционными рецептами","Солнечная энергия для независимости","Интерактивное обучение для детей и взрослых","Фьюжн стилей в одежде для креативных","Технологии для эффективного земледелия","Аудиооборудование для профессионалов","Биодобавки для естественного благополучия","Персонализированные путешествия по миру","Гармоничный декор для уютного дома","Быстрый интернет для работы и развлечений","Расслабляющие спа-процедуры для релакса","Хаб для инноваций в технологиях","Гурманские продукты для изысканного вкуса","Элитные автомобили для премиум-класса","Развитие мозга через образовательные инструменты","Сфера стиля для модных трендов","Чистая вода для здоровья семьи","Игровые студии для эпичных приключений","Клиники для комплексного ухода за здоровьем","Облачные решения для бизнеса","Кофе для бодрого старта дня","Общий транспорт для экологичного перемещения","Уход за кожей с натуральными ингредиентами","Энергия на краю инноваций","IT-услуги для мягкой интеграции","Свежие продукты с фермы к столу","Роскошные путешествия для незабываемых впечатлений"];
 
-        // ... (остальные массивы products, designProblems, marketingProblems, tasks, goals, colors — вставь их из предыдущего полного кода, они не изменились)
+        const products = ["Органические удобрения","AI-платформа для автоматизации","Свежие овощи и фрукты","Электрические скутеры","Линейка уличной одежды","Йога-маты и аксессуары","CRM-система","Солнечные панели","Мебель для гостиной","Фитнес-трекеры","VPN-сервисы","Энергетические напитки","Туристические пакеты","Умные термостаты","Кремы для лица","Протеиновые шейкеры","BI-инструменты","Крафтовое пиво","Электрокары","Медитационные приложения","VR-очки","Корм для собак","Мобильный банкинг app","Хлеб и пирожные","Инверторы для солнечных систем","Онлайн-курсы","Аксессуары для одежды","Дроны для ферм","Наушники","Витаминные комплексы","Экскурсионные туры","Подушки и покрывала","Роутеры","Маски для лица","Гаджеты для стартапов","Сыры и деликатесы","Спортивные машины","Пазлы для мозга","Сумки и рюкзаки","Фильтры для воды","Видеоигры","Диагностическое оборудование","Серверы","Кофейные зерна","Велосипеды-шеринг","Сыворотки для кожи","Батареи для хранения энергии","SaaS-платформы","Молочные продукты","Отельные пакеты"];
+
+        const designProblems = ["Устаревший логотип не отражает современный бренд","Несоответствие цветовой палитры в UI/UX","Плохая читаемость шрифтов на мобильных устройствах","Отсутствие responsive дизайна для разных экранов","Скучный визуальный стиль упаковки продуктов","Несогласованность иконок в приложении","Низкое качество изображений на сайте","Перегруженный интерфейс с лишними элементами","Отсутствие анимаций для вовлечения пользователей","Проблемы с доступностью для людей с нарушениями зрения","Устаревший дизайн email-рассылок","Несовместимость брендбука с новыми продуктами","Слабый визуальный storytelling в презентациях","Плохая композиция landing page","Отсутствие уникального маскота для бренда","Конфликт стилей в соцсетях постах","Низкая контрастность текстов и фона","Устаревшие иллюстрации в мерче","Проблемы с навигацией в веб-приложении","Отсутствие единого grid system в дизайне","Слабый фокус на ключевых элементах CTA","Несовременный дизайн визиток","Плохая интеграция видео в интерфейс","Отсутствие 3D-элементов для продуктов","Конфликты в типографике бренда","Устаревший дизайн баннеров","Низкое разрешение графики для печати","Проблемы с white space в layouts","Отсутствие motion design в промо","Несогласованность цветов в палитре","Слабый дизайн инфографики","Плохая визуализация данных в дашбордах","Устаревший стиль икон-сета","Отсутствие AR-элементов для продуктов","Конфликты в бренд-гидлайнах","Низкая привлекательность обложек","Проблемы с scaling векторной графики","Отсутствие immersive дизайна для VR","Слабый редизайн старых ассетов","Несовместимость с dark mode","Плохая анимация переходов","Отсутствие custom шрифтов","Конфликты в цветовой доступности","Устаревший дизайн флаеров","Низкое качество рендеров продуктов","Проблемы с alignment в grids","Отсутствие interactive элементов","Слабый дизайн error pages","Несогласованность в UI kits","Плохая визуальная иерархия"];
+
+        const marketingProblems = ["Низкий трафик на сайт из поисковиков","Слабая конверсия в email-кампаниях","Отток аудитории в соцсетях","Высокий bounce rate на landing pages","Низкий ROI от рекламы","Проблемы с сегментацией аудитории","Слабый engagement в контент-маркетинге","Конкуренция в PPC-рекламе","Низкие продажи в offseason","Проблемы с лояльностью клиентов","Слабый охват в influencer-маркетинге","Высокий churn rate подписчиков","Низкая видимость в поисковых системах","Проблемы с A/B-тестированием","Слабый user-generated content","Конкуренция на рынке affiliate","Низкий CTR в ads","Проблемы с персонализацией предложений","Слабый viral эффект кампаний","Высокие затраты на acquisition","Низкий lifetime value клиентов","Проблемы с ретаргетингом","Слабый PR в СМИ","Конкуренция в content SEO","Низкие конверсии из соцсетей","Проблемы с email deliverability","Слабый бренд-awareness","Высокий cart abandonment","Низкий engagement в webinars","Проблемы с партнерствами","Слабый lead generation","Конкуренция в programmatic ads","Низкие отзывы от клиентов","Проблемы с маркетинг-автоматизацией","Слабый охват в мобильном маркетинге","Высокие затраты на content creation","Низкий NPS score","Проблемы с cross-selling","Слабый event-маркетинг","Конкуренция в видео-рекламе","Низкие подписки на newsletter","Проблемы с data privacy в таргетинге","Слабый B2B lead nurturing","Высокий cost per click","Низкий share of voice","Проблемы с сезонным маркетингом","Слабый omnichannel подход","Конкуренция в e-commerce","Низкие метрики в app installs","Проблемы с crisis management в маркетинге"];
+
+        const tasks = ["Разработать кампанию по повышению бренд-осведомленности","Проанализировать конкурентов и предложить дифференциацию","Создать сезонную промо-стратегию","Оптимизировать цепочку поставок для маркетинга","Переработать визуальную идентичность бренда","Улучшить программу лояльности клиентов","Интегрировать маркетинг с IT-системами","Продвигать зеленые инициативы","Создать контент для соцсетей по интерьерам","Маркетинг безопасного фитнеса","Кампания по кибербезопасности","Разработать аллерго-дружественный маркетинг","Адаптировать туры под новые регуляции","Продвигать энергоэффективность","Кампания по уходу за кожей","Мотивирующий контент для фитнеса","Очистка и анализ данных для маркетинга","Брендинг ремесленного пива","Эко-маркетинг для авто","Продвижение mindfulness","Маркетинг VR для образования","Кампании для владельцев питомцев","Антифрод-маркетинг в банкинге","Маркетинг свежей выпечки","Продвижение солнечной энергии","Retention-стратегии для курсов","Трендовый маркетинг моды","Агро-маркетинг технологий","Аудио-брендинг","Маркетинг здоровых добавок","Безопасный туристический маркетинг","Аллерго-безопасный декор-маркетинг","Продвижение быстрого интернета","Пост-спа маркетинг","Фандрайзинг для инноваций","Маркетинг натуральных продуктов","Безопасный авто-маркетинг","Маркетинг образовательных инструментов","Устойчивый фэшн-маркетинг","Кампании по чистой воде","Гейм-маркетинг","Доступный мед-маркетинг","Облачный B2B-маркетинг","Кофейный брендинг","Анти-трафик кампании","Уход за кожей маркетинг","Энерго-хранение продвижение","SaaS-маркетинг","Свежий продакт-маркетинг","Персонализированный тревел-маркетинг"];
+
+        const goals = ["Увеличить долю рынка на 15%","Достичь 1 млн пользователей","Повысить продажи в offseason на 20%","Сократить затраты на логистику на 10%","Обновить бренд-идентичность","Увеличить retention до 70%","Интегрировать все системы","Стать лидером в зеленой энергии","Расширить онлайн-присутствие","Минимизировать травмы через образование","Обеспечить 99.9% uptime","Расширить линейку hypoallergenic продуктов","Адаптироваться к глобальным изменениям","Снизить энергопотребление на 30%","Достичь 5 млн продаж косметики","Увеличить engagement в фитнесе","Улучшить точность данных на 25%","Завоевать 10% рынка craft beer","Снизить эмиссии на 50%","Достичь 100k подписчиков на app","Сделать VR mainstream","Стать топ-брендом для pets","Нулевой tolerance к фроду","Увеличить shelf life","Покрыть 20% рынка солнечных","Снизить dropout до 10%","Лидерство в fast fashion","Увеличить урожайность на 15%","Достичь Hi-Fi стандартов","Расширить дистрибуцию добавок","Обеспечить безопасность туров","Сделать декор аллерго-free","Покрыть 90% регионов","Увеличить повторные визиты на 40%","Привлечь 5 млн инвестиций","Стать органик-лидером","Снизить аварии на 20%","Улучшить концентрацию учеников","Достичь устойчивости в производстве","Очистить 1 млн литров воды","Выпустить хит-игру","Расширить сеть клиник","Масштабировать до enterprise","Достичь 1 тонны продаж кофе","Снизить трафик на 15%","Лидер в skincare","Хранить 100% энергии","100k SaaS-подписчиков","Обеспечить свежесть на 100%","Персонализировать 80% туров"];
+
+        const colors = ["Green / #008000","Blue / #0000FF","Red / #FF0000","Yellow / #FFFF00","Purple / #800080","Orange / #FFA500","Pink / #FFC0CB","Teal / #008080","Indigo / #4B0082","Lime / #00FF00","Cyan / #00FFFF","Magenta / #FF00FF","Brown / #A52A2A","Gray / #808080","Navy / #000080","Olive / #808000","Maroon / #800000","Turquoise / #40E0D0","Violet / #EE82EE","Gold / #FFD700","Silver / #C0C0C0","Beige / #F5F5DC","Coral / #FF7F50","Lavender / #E6E6FA","Mint / #98FB98","Salmon / #FA8072","Khaki / #F0E68C","Plum / #DDA0DD","Azure / #F0FFFF","Crimson / #DC143C","Fuchsia / #FF00FF","Chartreuse / #7FFF00","Orchid / #DA70D6","Sienna / #A0522D","Thistle / #D8BFD8","Tomato / #FF6347","Wheat / #F5DEB3","Aquamarine / #7FFFD4","Bisque / #FFE4C4","CadetBlue / #5F9EA0","DarkGoldenrod / #B8860B","FireBrick / #B22222","ForestGreen / #228B22","HotPink / #FF69B4","IndianRed / #CD5C5C","LightSeaGreen / #20B2AA","MediumSpringGreen / #00FA9A","OliveDrab / #6B8E23","Peru / #CD853F","RoyalBlue / #4169E1"];
 
         let currentRole = "";
 
-        function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function randomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
 
         function showPage(id) {
             document.querySelectorAll(".page").forEach(p => p.style.display = "none");
@@ -255,25 +273,80 @@
             showPage("loading");
         }
 
-        function goToGenerator() { showPage(currentRole); }
-        function goHome() { showPage("home"); }
+        function goToGenerator() {
+            showPage(currentRole);
+        }
 
-        // generateDesign, generateMarketing, copy*, clearTZ — как раньше
+        function goHome() {
+            showPage("home");
+        }
 
-        function generateMarketingWithAnim() {
-            const container = document.querySelector("#marketing .cup-container");
-            container.classList.add("animate");
+        function generateDesign() {
+            const company = randomItem(companyNames);
+            const positioning = randomItem(positionings);
+            const color = randomItem(colors);
+            const product = randomItem(products);
+            const problem = randomItem(designProblems);
 
-            setTimeout(() => {
-                container.classList.remove("animate");
-                generateMarketing();
-            }, 1200); // длительность анимации
+            document.getElementById("design-tz").innerHTML = `
+                <p class="tz">Название компании: ${company}</p>
+                <p class="tz">Позиционирование: ${positioning}</p>
+                <p class="tz">Основной цвет: ${color}</p>
+                <p class="tz">Продукт: ${product}</p>
+                <p class="tz">Проблема: ${problem}</p>
+            `;
+        }
+
+        function generateMarketing() {
+            const company = randomItem(companyNames);
+            const positioning = randomItem(positionings);
+            const product = randomItem(products);
+            const problem = randomItem(marketingProblems);
+            const task = randomItem(tasks);
+            const goal = randomItem(goals);
+
+            document.getElementById("marketing-tz").innerHTML = `
+                <p class="tz">Название компании: ${company}</p>
+                <p class="tz">Позиционирование: ${positioning}</p>
+                <p class="tz">Продукт: ${product}</p>
+                <p class="tz">Проблема: ${problem}</p>
+                <p class="tz">Задача: ${task}</p>
+                <p class="tz">Цели компании: ${goal}</p>
+            `;
+        }
+
+        function copyDesignTZ() {
+            const tz = document.getElementById("design-tz");
+            if (!tz.innerText.trim()) return alert("Сначала сгенерируйте!");
+            const checks = Array.from(document.querySelectorAll("#design input[type=checkbox]:checked")).map(c => c.value);
+            const custom = document.getElementById("custom-design").value.trim();
+            const items = [...checks, custom].filter(Boolean).join(", ") || "дизайн-проект";
+            const lines = tz.innerText.split("\n").map(l => l.split(": ")[1] || "");
+            const text = `Привет, я представитель компании ${lines[0]}. Мы занимаемся в основном реализацией ${lines[3]} и вот недавно столкнулись со следующей проблемой ${lines[4]}. Нам срочно нужна твоя помощь! Директор по маркетингу очень просит сделать тебе ${items}. И просит учесть, что ${lines[2]} — это наш основной цвет, и в целом сам дизайн должен поддерживать наше позиционирование: ${lines[1]}. В целом мы готовы рассмотреть твои предложения по вайбу и общему настроению — мы доверяем тебе как специалисту. Ноль правок! Ждем твое решение!`;
+            navigator.clipboard.writeText(text).then(() => alert("Скопировано!"));
+        }
+
+        function copyMarketingTZ() {
+            const tz = document.getElementById("marketing-tz");
+            if (!tz.innerText.trim()) return alert("Сначала сгенерируйте!");
+            const type = document.getElementById("marketing-type").value;
+            const lines = tz.innerText.split("\n").map(l => l.split(": ")[1] || "");
+            const text = `Привет, я представитель компании ${lines[0]}. Мы занимаемся в основном реализацией ${lines[2]} и вот недавно столкнулись со следующей проблемой ${lines[3]}. Нам срочно нужна твоя помощь! Директор по маркетингу очень просит твоей помощи: помоги решить нашу задачу — ${lines[4]}. Думаю, ты и так знаешь, что решение должно коррелироваться с позиционированием (${lines[1]}). В этом квартале наша основная цель: ${lines[5]}. Ноль правок! Ждем твое решение! (Тип кейса: ${type})`;
+            navigator.clipboard.writeText(text).then(() => alert("Скопировано!"));
+        }
+
+        function clearTZ(role) {
+            document.getElementById(role + "-tz").innerHTML = "";
+            if (role === "design") {
+                document.querySelectorAll("#design input[type=checkbox]").forEach(i => i.checked = false);
+                document.getElementById("custom-design").value = "";
+            }
         }
 
         function createStars(id) {
             const container = document.querySelector(`#${id} .stars`);
             container.innerHTML = "";
-            const count = window.innerWidth > 900 ? 60 : 35;
+            const count = window.innerWidth > 768 ? 60 : 35;
             for (let i = 0; i < count; i++) {
                 const s = document.createElement("div");
                 s.className = "star";
