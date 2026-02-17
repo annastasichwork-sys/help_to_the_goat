@@ -262,12 +262,13 @@
       display: flex;
       gap: 24px;
       margin: 12px 0;
-      perspective: 800px;
+      perspective: 1000px;
     }
 
     #home .card {
       width: clamp(100px, 32vw, 150px);
       cursor: pointer;
+      transform-style: preserve-3d;
       transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, filter 0.3s;
       border-radius: 8px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 0 2px var(--felt-border);
@@ -303,10 +304,10 @@
     }
 
     @keyframes cardPicked {
-      0% { transform: scale(1); filter: brightness(1); }
-      30% { transform: scale(1.12) rotate(3deg); filter: brightness(1.4); }
-      70% { transform: scale(1.08) rotate(-1deg); filter: brightness(1.2); }
-      100% { transform: scale(1.05); filter: brightness(1.1); }
+      0% { transform: rotateY(0) scale(1); filter: brightness(1); }
+      30% { transform: rotateY(25deg) scale(1.12); filter: brightness(1.4); }
+      70% { transform: rotateY(-10deg) scale(1.08); filter: brightness(1.2); }
+      100% { transform: rotateY(0) scale(1.05); filter: brightness(1.1); }
     }
 
     /* Страница загрузки — рука плавно переходит в девушку */
@@ -535,6 +536,150 @@
       to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     }
 
+    /* Конфетти */
+    .confetti-wrap {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      top: 30%;
+      animation: confettiFall 1s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+      100% { opacity: 0; transform: translateY(80vh) translateX(var(--dx, 0)) rotate(720deg) scale(0.5); }
+    }
+
+    /* JACKPOT! вспышка */
+    .jackpot-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 998;
+      opacity: 0;
+    }
+
+    .jackpot-overlay.show {
+      animation: jackpotFlash 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .jackpot-overlay span {
+      font-size: clamp(2rem, 8vw, 3.5rem);
+      font-weight: 800;
+      color: #ffea70;
+      text-shadow: 0 0 20px rgba(255,234,112,0.9), 0 0 40px rgba(212,175,55,0.6);
+      letter-spacing: 0.1em;
+      transform: scale(0.5);
+    }
+
+    @keyframes jackpotFlash {
+      0% { opacity: 0; background: rgba(0,0,0,0); }
+      15% { opacity: 1; background: rgba(0,0,0,0.3); }
+      30% { opacity: 1; }
+      100% { opacity: 0; background: rgba(0,0,0,0); }
+    }
+
+    .jackpot-overlay.show span {
+      animation: jackpotPop 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes jackpotPop {
+      0% { transform: scale(0.3); opacity: 0; }
+      40% { transform: scale(1.15); opacity: 1; }
+      70% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.1); opacity: 0; }
+    }
+
+    /* Тряска экрана */
+    body.shake {
+      animation: screenShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-4px, 2px); }
+      20% { transform: translate(4px, -2px); }
+      30% { transform: translate(-3px, 3px); }
+      40% { transform: translate(3px, -3px); }
+      50% { transform: translate(-2px, 2px); }
+      60% { transform: translate(2px, -2px); }
+      70% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+    }
+
+    /* Shimmer на кнопках */
+    .btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: none;
+    }
+
+    .btn:hover::after {
+      animation: btnShimmer 0.6s ease-out forwards;
+    }
+
+    @keyframes btnShimmer {
+      to { left: 100%; }
+    }
+
+    /* Плавающие фишки на главной */
+    #home .chips-float {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #home .chip {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffea70, #d4af37);
+      border: 2px solid rgba(0,0,0,0.2);
+      opacity: 0.15;
+      animation: chipFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes chipFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(10px, -15px) rotate(90deg); }
+      50% { transform: translate(-5px, -25px) rotate(180deg); }
+      75% { transform: translate(-15px, -10px) rotate(270deg); }
+    }
+
+    /* Пульс ТЗ после генерации */
+    .tz-box.reveal {
+      animation: tzReveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, tzPulse 2s ease-in-out 0.6s 2 forwards;
+    }
+
+    @keyframes tzPulse {
+      0%, 100% { box-shadow: inset 0 0 24px rgba(255,234,112,0.05), 0 4px 20px rgba(0,0,0,0.4); border-color: rgba(255,234,112,0.2); }
+      50% { box-shadow: inset 0 0 32px rgba(255,234,112,0.15), 0 0 24px rgba(255,234,112,0.3); border-color: rgba(255,234,112,0.5); }
+    }
+
     /* Адаптация для планшетов и десктопов */
     @media (min-width: 768px) {
       h1 { font-size: 2.6rem; }
@@ -546,6 +691,7 @@
 <body>
   <!-- Главная -->
   <div id="home" class="page">
+    <div class="chips-float" id="chips-float"></div>
     <img src="home_hand.png" class="hand" alt="Ладонь, приглашающая выбрать карту" onerror="this.style.display='none'" />
     <div class="cards">
       <img src="card_design.png" class="card" onclick="selectRole('design')" alt="Карта дизайнера" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22150%22/%3E';this.style.background='linear-gradient(135deg,rgba(255,234,112,0.3),rgba(212,175,55,0.2))'" />
@@ -617,6 +763,8 @@
   </div>
 
   <div id="toast" class="toast" aria-live="polite"></div>
+  <div id="confetti-wrap" class="confetti-wrap"></div>
+  <div id="jackpot-overlay" class="jackpot-overlay"><span>JACKPOT!</span></div>
 
   <script>
     // Логичные кейсы: компания + продукт + позиционирование связаны по домену (индустрии)
@@ -746,6 +894,39 @@
       showToast._t = setTimeout(() => el.classList.remove("show"), 2000);
     }
 
+    function burstConfetti() {
+      const wrap = document.getElementById("confetti-wrap");
+      wrap.innerHTML = "";
+      const colors = ["#ffea70", "#d4af37", "#ffd700", "#fff", "#ff6b6b"];
+      const count = 35;
+      for (let i = 0; i < count; i++) {
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = (30 + Math.random() * 40) + "%";
+        c.style.setProperty("--dx", (Math.random() - 0.5) * 200 + "px");
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDelay = Math.random() * 0.15 + "s";
+        c.style.animationDuration = (0.8 + Math.random() * 0.5) + "s";
+        wrap.appendChild(c);
+      }
+      setTimeout(() => wrap.innerHTML = "", 1500);
+    }
+
+    function showJackpot() {
+      const el = document.getElementById("jackpot-overlay");
+      el.classList.remove("show");
+      el.offsetHeight;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 1000);
+    }
+
+    function screenShake() {
+      document.body.classList.remove("shake");
+      document.body.offsetHeight;
+      document.body.classList.add("shake");
+      setTimeout(() => document.body.classList.remove("shake"), 400);
+    }
+
     function randomItem(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
     }
@@ -756,7 +937,22 @@
       const el = document.getElementById(id);
       el.style.display = "flex";
       if (id === "design" || id === "marketing") createStars(id);
+      if (id === "home") createChips();
       setupTelegramButtons(id);
+    }
+
+    function createChips() {
+      const wrap = document.getElementById("chips-float");
+      if (!wrap || wrap.children.length > 0) return;
+      for (let i = 0; i < 6; i++) {
+        const chip = document.createElement("div");
+        chip.className = "chip";
+        chip.style.left = (15 + Math.random() * 70) + "%";
+        chip.style.top = (20 + Math.random() * 60) + "%";
+        chip.style.animationDelay = (i * 1.2) + "s";
+        chip.style.animationDuration = (6 + Math.random() * 4) + "s";
+        wrap.appendChild(chip);
+      }
     }
 
     function setupTelegramButtons(pageId) {
@@ -808,8 +1004,10 @@
       currentRole = role;
       const card = document.querySelector(`#home .card[onclick*="${role}"]`);
       if (card) {
+        card.classList.remove("picked");
+        card.offsetHeight;
         card.classList.add("picked");
-        setTimeout(() => card.classList.remove("picked"), 500);
+        setTimeout(() => card.classList.remove("picked"), 700);
       }
       showPage("loading");
     }
@@ -826,6 +1024,8 @@
 
     function generateDesign() {
       haptic("medium");
+      screenShake();
+      burstConfetti();
       const domain = randomItem(caseDomains);
       const col = randomItem(domain.colors);
       const prod = randomItem(domain.products);
@@ -842,6 +1042,7 @@
       `;
       tzBox.offsetHeight;
       tzBox.classList.add("reveal");
+      showJackpot();
       setupTelegramButtons("design");
       const img = document.querySelector("#design .gen-img");
       img.classList.remove("spinning", "jackpot");
@@ -856,6 +1057,8 @@
 
     function generateMarketing() {
       haptic("medium");
+      screenShake();
+      burstConfetti();
       const domain = randomItem(caseDomains);
       const prod = randomItem(domain.products);
       const prob = randomItem(domain.marketingProblems);
@@ -874,6 +1077,7 @@
       `;
       tzBox.offsetHeight;
       tzBox.classList.add("reveal");
+      showJackpot();
       setupTelegramButtons("marketing");
       const img = document.querySelector("#marketing .gen-img");
       img.classList.remove("shaking");
